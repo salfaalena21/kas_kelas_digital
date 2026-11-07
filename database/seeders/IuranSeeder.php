@@ -19,7 +19,10 @@ class IuranSeeder extends Seeder
         ];
 
         foreach ($data as $i) {
-            Iuran::create($i);
+            Iuran::firstOrCreate(
+                ['periode' => $i['periode'], 'minggu' => $i['minggu']],
+                $i
+            );
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace Database\Seeders;
 
@@ -11,23 +11,29 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Admin
+        User::firstOrCreate(
+            ['username' => 'admin'],
+            ['nama' => 'Administrator', 'password' => Hash::make('admin123'), 'password_hint' => Crypt::encryptString('admin123'), 'role' => 'admin']
+        );
+
         // Bendahara (petugas pencatat sesuai ERD)
         User::firstOrCreate(
             ['username' => 'bendahara1'],
-            ['nama' => 'Siti Andini', 'password' => Hash::make('password123'), 'password_hint' => Crypt::encryptString('password123'), 'role' => 'bendahara']
+            ['nama' => 'Siti Andini', 'password' => Hash::make('bendahara1'), 'password_hint' => Crypt::encryptString('bendahara1'), 'role' => 'bendahara']
         );
 
         // Wali Kelas
         User::firstOrCreate(
             ['username' => 'walikelas1'],
-            ['nama' => 'Pak Baban', 'password' => Hash::make('password123'), 'password_hint' => Crypt::encryptString('password123'), 'role' => 'wali_kelas']
+            ['nama' => 'Pak Baban', 'password' => Hash::make('walikelas1'), 'password_hint' => Crypt::encryptString('walikelas1'), 'role' => 'wali_kelas']
         );
 
-        // 36 akun siswa (siswa01 - siswa36)
+        // 36 akun siswa (siswa1 - siswa36)
         foreach (self::daftarSiswa() as $s) {
             User::firstOrCreate(
                 ['username' => $s['username']],
-                ['nama' => $s['nama'], 'password' => Hash::make('password123'), 'password_hint' => Crypt::encryptString('password123'), 'role' => 'siswa']
+                ['nama' => $s['nama'], 'password' => Hash::make($s['username']), 'password_hint' => Crypt::encryptString($s['username']), 'role' => 'siswa']
             );
         }
     }
