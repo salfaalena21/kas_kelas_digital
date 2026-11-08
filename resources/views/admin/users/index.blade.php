@@ -3,9 +3,13 @@
 @section('title', 'Kelola Pengguna')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Kelola Pengguna</h1>
-    <p class="text-gray-500 text-sm">CRUD akun pengguna (admin, bendahara, wali kelas, siswa)</p>
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
+    <div class="relative z-10">
+        <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block"><i class="fa-solid fa-users-gear mr-1"></i> Admin</span>
+        <h1 class="text-2xl font-bold mb-1">Kelola Pengguna</h1>
+        <p class="text-blue-100 text-sm">CRUD akun pengguna (admin, bendahara, wali kelas, siswa)</p>
+    </div>
+    <div class="hidden md:block opacity-20 text-7xl pr-4"><i class="fa-solid fa-users-gear"></i></div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

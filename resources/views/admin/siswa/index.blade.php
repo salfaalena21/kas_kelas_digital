@@ -3,12 +3,13 @@
 @section('title', 'Data Siswa')
 
 @section('content')
-<div class="mb-6 flex flex-wrap items-center justify-between gap-2">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800">Data Siswa</h1>
-        <p class="text-gray-500 text-sm">Kelola data siswa & relasi akun</p>
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
+    <div class="relative z-10">
+        <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block"><i class="fa-solid fa-user-graduate mr-1"></i> Admin</span>
+        <h1 class="text-2xl font-bold mb-1">Data Siswa</h1>
+        <p class="text-blue-100 text-sm">Kelola data siswa & relasi akun</p>
     </div>
-    <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm">+ Tambah Siswa</button>
+    <div class="hidden md:block opacity-20 text-7xl pr-4"><i class="fa-solid fa-user-graduate"></i></div>
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">

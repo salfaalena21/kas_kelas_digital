@@ -35,7 +35,7 @@
         @endif
 
         <!-- Form Login (sesuai ERD: username + password) -->
-        <form action="{{ url('/login') }}" method="POST" class="space-y-5">
+        <form action="{{ url('/login') }}" method="POST" class="space-y-5" id="loginForm" autocomplete="on">
             @csrf
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
@@ -58,7 +58,7 @@
                 </div>
             </div>
 
-            <button type="submit"
+            <button type="submit" id="loginSubmitBtn"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12 rounded-xl transition duration-200 shadow-md">
                 Masuk ke System
             </button>
@@ -84,6 +84,28 @@
                 this.setAttribute('aria-label', show ? 'Sembunyikan sandi' : 'Tampilkan sandi');
             });
         }
+
+        // Hanya proses login saat tombol "Masuk ke System" diklik (mencegah auto-submit/autofill).
+        (function () {
+            const form = document.getElementById('loginForm');
+            const btn = document.getElementById('loginSubmitBtn');
+            if (!form || !btn) return;
+            let allowSubmit = false;
+            btn.addEventListener('pointerdown', function () { allowSubmit = true; });
+            btn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') allowSubmit = true;
+            });
+            form.addEventListener('submit', function (e) {
+                if (!allowSubmit) {
+                    e.preventDefault();
+                    return false;
+                }
+                allowSubmit = false;
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                btn.textContent = 'Memproses...';
+            });
+        })();
     </script>
 </body>
 </html>

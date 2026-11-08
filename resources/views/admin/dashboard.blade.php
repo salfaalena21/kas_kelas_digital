@@ -3,54 +3,85 @@
 @section('title', 'Dashboard Admin')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Dashboard Admin</h1>
-    <p class="text-gray-500 text-sm">Ringkasan sistem kas kelas</p>
+<!-- Banner -->
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
+    <div class="relative z-10 max-w-xl">
+        <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block">
+            <i class="fa-solid fa-shield-halved mr-1"></i> Panel Administrator
+        </span>
+        <h2 class="text-2xl font-bold mb-1">Dashboard Admin</h2>
+        <p class="text-blue-100 text-sm">Halo {{ Auth::user()->nama ?? 'Admin' }}, pantau ringkasan pengguna, data kelas, dan arus kas SmartKas.</p>
+    </div>
+    <div class="hidden md:block opacity-20 text-8xl pr-4"><i class="fa-solid fa-gauge-high"></i></div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total User</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">{{ $totalUser }}</p>
+<!-- Ringkasan Sistem -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total User</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ $totalUser }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-users-gear"></i></div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total Kelas</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">{{ $totalKelas }}</p>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Kelas</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ $totalKelas }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-school"></i></div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total Siswa</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">{{ $totalSiswa }}</p>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Siswa</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ $totalSiswa }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-user-graduate"></i></div>
     </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total Iuran</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">{{ $totalIuran }}</p>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total Pemasukan</p>
-        <p class="text-xl font-bold text-green-600 mt-1">Rp {{ number_format($pemasukan, 0, ',', '.') }}</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Total Pengeluaran</p>
-        <p class="text-xl font-bold text-red-600 mt-1">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</p>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <p class="text-sm text-gray-500">Saldo Kas</p>
-        <p class="text-xl font-bold text-blue-600 mt-1">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Iuran</p>
+            <h4 class="text-2xl font-bold text-gray-800">{{ $totalIuran }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-coins"></i></div>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+<!-- Ringkasan Keuangan -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Pemasukan</p>
+            <h4 class="text-2xl font-bold text-green-600">Rp {{ number_format($pemasukan, 0, ',', '.') }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-wallet"></i></div>
+    </div>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Pengeluaran</p>
+            <h4 class="text-2xl font-bold text-red-600">Rp {{ number_format($pengeluaran, 0, ',', '.') }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+    </div>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Saldo Kas</p>
+            <h4 class="text-2xl font-bold text-blue-600">Rp {{ number_format($saldo, 0, ',', '.') }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-scale-balanced"></i></div>
+    </div>
+</div>
+
+<!-- Grafik -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h2 class="font-bold text-gray-800">Arus Kas 6 Bulan Terakhir</h2>
+                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-chart-column text-blue-600"></i> Arus Kas 6 Bulan Terakhir</h3>
                 <p class="text-xs text-gray-400">Pemasukan dan pengeluaran kas per bulan</p>
             </div>
             <span class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-chart-column"></i> Bulanan
+                <i class="fa-solid fa-calendar"></i> Bulanan
             </span>
         </div>
         <div class="h-72">
@@ -58,9 +89,9 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div class="mb-4">
-            <h2 class="font-bold text-gray-800">Status Pembayaran</h2>
+            <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-chart-pie text-blue-600"></i> Status Pembayaran</h3>
             <p class="text-xs text-gray-400">Lunas vs belum lunas</p>
         </div>
         <div class="h-56">
