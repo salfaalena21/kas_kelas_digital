@@ -1,0 +1,27 @@
+kind: wasmer.io/App.v0
+owner: GANTI_USERNAME_WASMER
+name: smartkas
+package: .
+description: SmartKas - Sistem Informasi Pengelolaan Kas Kelas Digital
+
+scaling:
+  mode: single_concurrency
+
+capabilities:
+  database:
+    engine: mysql
+  instaboot:
+    requests:
+      - path: /login
+
+env:
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: https://smartkas.wasmer.app
+  DB_CONNECTION: mysql
+  SESSION_DRIVER: database
+  CACHE_STORE: database
+  QUEUE_CONNECTION: database
+  FILESYSTEM_DISK: public
+  LOG_CHANNEL: stderr
+  VIEW_COMPILED_PATH: /tmp

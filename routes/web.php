@@ -21,7 +21,33 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         $pemasukan = \App\Models\Pembayaran::sum('nominal_bayar');
         $pengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $saldo = $pemasukan - $pengeluaran;
-        return view('admin.dashboard', compact('totalSiswa', 'totalKelas', 'totalUser', 'totalIuran', 'pemasukan', 'pengeluaran', 'saldo'));
+
+        // Grafik arus kas 6 bulan terakhir
+        $chartLabels = [];
+        $chartMasuk = [];
+        $chartKeluar = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $bulan = now()->startOfMonth()->subMonths($i);
+            $chartLabels[] = $bulan->locale('id')->translatedFormat('M Y');
+            $chartMasuk[] = (float) \App\Models\Pembayaran::whereYear('tanggal_bayar', $bulan->year)
+                ->whereMonth('tanggal_bayar', $bulan->month)
+                ->sum('nominal_bayar');
+            $chartKeluar[] = (float) \App\Models\Pengeluaran::whereYear('tanggal', $bulan->year)
+                ->whereMonth('tanggal', $bulan->month)
+                ->sum('jumlah');
+        }
+
+        // Grafik status pembayaran (lunas vs belum lunas)
+        $totalTagihan = $totalSiswa * $totalIuran;
+        $totalLunas = min(\App\Models\Pembayaran::where('status', 'lunas')->count(), $totalTagihan);
+        $belumLunas = max($totalTagihan - $totalLunas, 0);
+
+        return view('admin.dashboard', compact(
+            'totalSiswa', 'totalKelas', 'totalUser', 'totalIuran',
+            'pemasukan', 'pengeluaran', 'saldo',
+            'chartLabels', 'chartMasuk', 'chartKeluar',
+            'totalTagihan', 'totalLunas', 'belumLunas'
+        ));
     })->name('admin.dashboard');
 
     Route::get('/users', function () {
