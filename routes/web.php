@@ -530,33 +530,38 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::get('/upload-bukti', function () {
         $siswaSaya = \Illuminate\Support\Facades\Auth::user()->siswa;
-        $pembayaranSaya = collect();
         $buktiSaya = collect();
         if ($siswaSaya) {
-            $pembayaranSaya = \App\Models\Pembayaran::with('iuran')
-                ->where('id_siswa', $siswaSaya->id_siswa)
-                ->where('status', '!=', 'lunas')
-                ->orderBy('tanggal_bayar', 'desc')->get();
-
             $buktiSaya = \App\Models\BuktiPembayaran::with(['pembayaran.iuran'])
                 ->whereHas('pembayaran', fn ($q) => $q->where('id_siswa', $siswaSaya->id_siswa))
                 ->orderBy('id_bukti', 'desc')->get();
         }
-        return view('siswa.upload', compact('siswaSaya', 'pembayaranSaya', 'buktiSaya'));
+        return view('siswa.upload', compact('siswaSaya', 'buktiSaya'));
     })->name('siswa.upload');
 
     Route::post('/upload-bukti', function (Illuminate\Http\Request $request) {
         $request->validate([
-            'id_pembayaran' => 'required|exists:pembayaran,id_pembayaran',
             'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
         $siswaSaya = \Illuminate\Support\Facades\Auth::user()->siswa;
+        if (! $siswaSaya) {
+            return back()->with('error', 'Data siswa tidak ditemukan.');
+        }
+
+        $pembayaran = \App\Models\Pembayaran::where('id_siswa', $siswaSaya->id_siswa)
+            ->orderBy('tanggal_bayar', 'desc')
+            ->orderBy('id_pembayaran', 'desc')
+            ->first();
+
+        if (! $pembayaran) {
+            return back()->with('error', 'Belum ada data pembayaran untuk dikaitkan dengan bukti.');
+        }
 
         $file = $request->file('proof_file');
         $path = $file->store('bukti', 'public');
 
         \App\Models\BuktiPembayaran::create([
-            'id_pembayaran' => $request->id_pembayaran,
+            'id_pembayaran' => $pembayaran->id_pembayaran,
             'nama_file' => $file->getClientOriginalName(),
             'file_path' => 'storage/' . $path,
             'status_verifikasi' => 'pending',

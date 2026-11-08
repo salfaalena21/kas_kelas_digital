@@ -19,19 +19,8 @@
         <form action="{{ route('siswa.upload.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Pembayaran</label>
-                <select name="id_pembayaran" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-                    <option value="">-- Pilih Pembayaran --</option>
-                    @foreach($pembayaranSaya as $p)
-                        <option value="{{ $p->id_pembayaran }}">
-                            {{ $p->iuran->periode ?? '-' }} {{ $p->iuran->minggu ?? '' }} — Rp {{ number_format($p->nominal_bayar, 0, ',', '.') }} ({{ \Carbon\Carbon::parse($p->tanggal_bayar)->format('d/m/Y') }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti (JPG/PNG, maks 2MB)</label>
-                <input type="file" name="proof_file" accept="image/jpeg,image/png,image/jpg" required
+                <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti (JPG/PNG/PDF, maks 2MB)</label>
+                <input type="file" name="proof_file" accept="image/jpeg,image/png,image/jpg,application/pdf" required
                        class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold focus:outline-none">
             </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
@@ -48,7 +37,6 @@
                 <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold">
                     <tr>
                         <th class="p-3 rounded-l-xl">No</th>
-                        <th class="p-3">Pembayaran</th>
                         <th class="p-3">File</th>
                         <th class="p-3 rounded-r-xl">Status Verifikasi</th>
                     </tr>
@@ -57,10 +45,6 @@
                     @forelse($buktiSaya as $i => $b)
                         <tr class="hover:bg-gray-50">
                             <td class="p-3">{{ $i + 1 }}</td>
-                            <td class="p-3 font-medium text-gray-900">
-                                {{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}
-                                <br><span class="text-xs text-gray-400">Rp {{ number_format($b->pembayaran->nominal_bayar ?? 0, 0, ',', '.') }}</span>
-                            </td>
                             <td class="p-3">
                                 <a href="{{ asset($b->file_path) }}" target="_blank" class="text-blue-600 hover:underline text-xs font-semibold">
                                     <i class="fa-solid fa-image me-1"></i>{{ $b->nama_file }}
@@ -77,7 +61,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
+                        <tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
                     @endforelse
                 </tbody>
             </table>

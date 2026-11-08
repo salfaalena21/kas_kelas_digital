@@ -68,6 +68,13 @@
                     </select>
                 </div>
             </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    <option value="lunas">Lunas</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
                 <i class="fa-solid fa-save me-1"></i> Simpan Pembayaran
             </button>
@@ -100,7 +107,15 @@
                             <td class="p-3 text-green-600 font-semibold">Rp {{ number_format($item->nominal_bayar, 0, ',', '.') }}</td>
                             <td class="p-3">Rp {{ number_format($item->kembalian, 0, ',', '.') }}</td>
                             <td class="p-3">{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') }}</td>
-                            <td class="p-3"><span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">{{ ucfirst($item->status) }}</span></td>
+                            <td class="p-3">
+                                @if($item->status === 'lunas')
+                                    <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">Lunas</span>
+                                @elseif($item->status === 'pending')
+                                    <span class="bg-amber-100 text-amber-700 text-xs px-2.5 py-1 rounded-full font-semibold">Pending</span>
+                                @else
+                                    <span class="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full font-semibold">{{ ucfirst($item->status) }}</span>
+                                @endif
+                            </td>
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
                                     <button type="button" onclick="openEditModal(this)"

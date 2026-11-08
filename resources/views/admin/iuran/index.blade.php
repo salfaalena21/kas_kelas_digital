@@ -32,12 +32,6 @@
                         <button onclick="editIuran({{ $i->id_iuran }}, '{{ addslashes($i->periode) }}', '{{ addslashes($i->minggu ?? '') }}', {{ $i->nominal }})" class="w-8 h-8 inline-flex items-center justify-center bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg transition" title="Edit" aria-label="Edit">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <form action="{{ route('admin.iuran.destroy', $i->id_iuran) }}" method="POST" onsubmit="return confirm('Hapus iuran ini?')" class="inline-flex">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="w-8 h-8 inline-flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition" title="Hapus" aria-label="Hapus">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
                     </div>
                 </td>
             </tr>
