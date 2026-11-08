@@ -24,7 +24,11 @@
                         <td class="p-3">{{ $i+1 }}</td>
                         <td class="p-3 font-medium text-gray-900">{{ $b->pembayaran->siswa->nama ?? '-' }}</td>
                         <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
-                        <td class="p-3 text-xs">{{ $b->nama_file }}<br><span class="text-gray-400">{{ $b->file_path }}</span></td>
+                        @php $fileUrl = asset(\Illuminate\Support\Str::startsWith($b->file_path, 'storage/') ? $b->file_path : 'storage/' . ltrim($b->file_path, '/')); @endphp
+                        <td class="p-3 text-xs">
+                            <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline font-semibold">{{ $b->nama_file }}</a>
+                            <br><span class="text-gray-400 break-all">{{ $b->file_path }}</span>
+                        </td>
                         <td class="p-3">
                             @if($b->status_verifikasi === 'verified')
                                 <span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-semibold">Terverifikasi</span>
@@ -43,7 +47,7 @@
                                         data-tanggal="{{ $b->pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($b->pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}"
                                         data-metode="{{ ucfirst($b->pembayaran->metode ?? '-') }}"
                                         data-file="{{ $b->nama_file }}"
-                                        data-path="{{ asset($b->file_path) }}"
+                                        data-path="{{ asset(\Illuminate\Support\Str::startsWith($b->file_path, 'storage/') ? $b->file_path : 'storage/' . ltrim($b->file_path, '/')) }}"
                                         data-status="{{ $b->status_verifikasi }}"
                                         data-id="{{ $b->id_bukti }}"
                                         class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg transition"
@@ -112,11 +116,15 @@
             <span id="lihat_status"></span>
         </div>
         <div class="bg-gray-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center min-h-[200px]">
-            <img id="lihat_img" src="" alt="Bukti transfer" class="max-h-[60vh] w-full object-contain"
-                 onerror="this.style.display='none';document.getElementById('lihat_img_fallback').style.display='flex';">
-            <div id="lihat_img_fallback" style="display:none;" class="flex-col items-center text-gray-400 text-sm p-8 text-center">
-                <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
-                <p>File gambar tidak ditemukan di server.<br><span class="text-xs">Path: <span id="lihat_path"></span></span></p>
+            <img id="lihat_img" src="" alt="Bukti transfer" class="max-h-[60vh] w-full object-contain hidden">
+            <iframe id="lihat_pdf" src="" class="w-full hidden" style="height:60vh;" title="Bukti PDF"></iframe>
+            <div id="lihat_img_fallback" style="display:none;" class="flex flex-col items-center text-gray-500 text-sm p-8 text-center gap-2">
+                <i class="fa-solid fa-file-circle-question text-3xl mb-1 text-gray-400"></i>
+                <p id="lihat_fallback_msg">Pratinjau tidak tersedia atau file tidak ditemukan.</p>
+                <a id="lihat_open_link" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka file
+                </a>
+                <span class="text-xs text-gray-400 break-all">URL: <span id="lihat_path"></span></span>
             </div>
         </div>
 
@@ -148,6 +156,7 @@
         document.getElementById('lihat_metode').textContent = btn.dataset.metode;
         document.getElementById('lihat_file').textContent = btn.dataset.file;
         document.getElementById('lihat_path').textContent = btn.dataset.path;
+        document.getElementById('lihat_open_link').href = btn.dataset.path;
 
         const statusEl = document.getElementById('lihat_status');
         const st = btn.dataset.status;
@@ -158,9 +167,35 @@
         statusEl.textContent = label;
 
         const img = document.getElementById('lihat_img');
-        img.style.display = '';
-        document.getElementById('lihat_img_fallback').style.display = 'none';
-        img.src = btn.dataset.path;
+        const pdf = document.getElementById('lihat_pdf');
+        const fb = document.getElementById('lihat_img_fallback');
+        const fbMsg = document.getElementById('lihat_fallback_msg');
+        const file = (btn.dataset.file || '').toLowerCase();
+        const path = btn.dataset.path || '';
+        const isPdf = file.endsWith('.pdf');
+        const isImg = /\.(jpe?g|png|gif|webp|bmp)$/i.test(file);
+
+        img.classList.add('hidden'); img.removeAttribute('src');
+        pdf.classList.add('hidden'); pdf.removeAttribute('src');
+        fb.style.display = 'none';
+
+        if (isPdf) {
+            pdf.src = path;
+            pdf.classList.remove('hidden');
+        } else if (isImg) {
+            img.onload = function () { fb.style.display = 'none'; };
+            img.onerror = function () {
+                img.classList.add('hidden');
+                fbMsg.textContent = 'Gambar tidak dapat dimuat. File mungkin belum tersimpan di server atau path tidak valid. Coba klik "Buka file".';
+                fb.style.display = 'flex';
+            };
+            img.src = path;
+            img.classList.remove('hidden');
+        } else {
+            fbMsg.textContent = 'Pratinjau tidak tersedia untuk tipe file ini. Klik "Buka file" untuk melihat.';
+            fb.style.display = 'flex';
+            if (path) { pdf.src = path; pdf.classList.remove('hidden'); fb.style.display = 'none'; }
+        }
 
         const verifyUrl = "{{ url('bendahara/bukti') }}/" + btn.dataset.id;
         document.getElementById('lihatFormVerify').action = verifyUrl;
