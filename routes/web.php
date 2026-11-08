@@ -511,7 +511,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::post('/upload-bukti', function (Illuminate\Http\Request $request) {
         $request->validate([
             'id_iuran' => 'required|exists:iuran,id_iuran',
-            'metode' => 'required|in:tunai,transfer',
             'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
         $siswaSaya = \Illuminate\Support\Facades\Auth::user()->siswa;
@@ -535,11 +534,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
                 'tanggal_bayar' => now()->toDateString(),
                 'nominal_bayar' => $iuran->nominal ?? 0,
                 'kembalian' => 0,
-                'metode' => $request->metode,
+                'metode' => 'transfer',
                 'status' => 'pending',
             ]);
         } else {
-            $pembayaran->metode = $request->metode;
+            $pembayaran->metode = 'transfer';
             $pembayaran->save();
         }
 

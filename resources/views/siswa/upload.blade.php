@@ -36,16 +36,7 @@
                 @error('id_iuran')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
-                <select name="metode" required class="w-full px-3 py-2 border {{ $errors->has('metode') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- Pilih metode --</option>
-                    <option value="tunai" {{ old('metode') === 'tunai' ? 'selected' : '' }}>Tunai</option>
-                    <option value="transfer" {{ old('metode') === 'transfer' ? 'selected' : '' }}>Transfer</option>
-                </select>
-                @error('metode')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti (JPG/PNG/PDF, maks 2MB)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti Transfer (JPG/PNG/PDF, maks 2MB)</label>
                 <input type="file" name="proof_file" accept="image/jpeg,image/png,image/jpg,application/pdf" required
                        class="w-full px-3 py-2 border {{ $errors->has('proof_file') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold focus:outline-none">
                 @error('proof_file')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
