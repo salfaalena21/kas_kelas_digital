@@ -21,9 +21,19 @@
         <form action="{{ route('siswa.upload.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
+                <select name="metode" required class="w-full px-3 py-2 border {{ $errors->has('metode') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Pilih metode --</option>
+                    <option value="tunai" {{ old('metode') === 'tunai' ? 'selected' : '' }}>Tunai</option>
+                    <option value="transfer" {{ old('metode') === 'transfer' ? 'selected' : '' }}>Transfer</option>
+                </select>
+                @error('metode')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
+            </div>
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti (JPG/PNG/PDF, maks 2MB)</label>
                 <input type="file" name="proof_file" accept="image/jpeg,image/png,image/jpg,application/pdf" required
-                       class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold focus:outline-none">
+                       class="w-full px-3 py-2 border {{ $errors->has('proof_file') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold focus:outline-none">
+                @error('proof_file')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
                 <i class="fa-solid fa-upload me-1"></i> Upload Bukti
@@ -40,6 +50,7 @@
                     <tr>
                         <th class="p-3 rounded-l-xl">No</th>
                         <th class="p-3">File</th>
+                        <th class="p-3">Metode</th>
                         <th class="p-3 rounded-r-xl">Status Verifikasi</th>
                     </tr>
                 </thead>
@@ -52,6 +63,7 @@
                                     <i class="fa-solid fa-image me-1"></i>{{ $b->nama_file }}
                                 </a>
                             </td>
+                            <td class="p-3 capitalize">{{ $b->pembayaran->metode ?? '-' }}</td>
                             <td class="p-3">
                                 @if($b->status_verifikasi === 'verified')
                                     <span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-semibold">Terverifikasi</span>
@@ -63,7 +75,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
+                        <tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
                     @endforelse
                 </tbody>
             </table>

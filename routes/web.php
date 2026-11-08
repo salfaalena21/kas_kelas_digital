@@ -502,6 +502,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
     Route::post('/upload-bukti', function (Illuminate\Http\Request $request) {
         $request->validate([
+            'metode' => 'required|in:tunai,transfer',
             'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
         $siswaSaya = \Illuminate\Support\Facades\Auth::user()->siswa;
@@ -517,6 +518,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         if (! $pembayaran) {
             return back()->with('error', 'Belum ada data pembayaran untuk dikaitkan dengan bukti.');
         }
+
+        $pembayaran->metode = $request->metode;
+        $pembayaran->save();
 
         $file = $request->file('proof_file');
         $path = $file->store('bukti', 'public');
