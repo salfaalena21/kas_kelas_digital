@@ -12,9 +12,7 @@
     <!-- TOPBAR MOBILE -->
     <header class="fixed top-0 inset-x-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden z-30">
         <div class="flex items-center space-x-2">
-            <div class="bg-blue-600 text-white p-2 rounded-xl text-lg font-bold">
-                <i class="fa-solid fa-wallet"></i>
-            </div>
+            <img src="{{ asset('images/logo-smartkas.jpg') }}" alt="Logo SmartKas" class="h-10 w-auto rounded-lg object-contain">
             <div class="leading-none">
                 <h1 class="font-bold text-base text-blue-600">SmartKas</h1>
                 <span class="text-[10px] text-gray-400">MANAJEMEN KAS KELAS</span>
@@ -33,17 +31,15 @@
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 flex flex-col p-4 z-50 transform transition-transform duration-300 -translate-x-full md:translate-x-0">
         <div class="shrink-0">
             <div class="flex items-center justify-between mb-6 px-2">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-blue-600 text-white p-2 rounded-xl text-xl font-bold">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                    <div>
+                <div class="flex items-center space-x-3 min-w-0">
+                    <img src="{{ asset('images/logo-smartkas.jpg') }}" alt="Logo SmartKas" class="h-11 w-auto max-w-[140px] rounded-lg object-contain shrink-0">
+                    <div class="min-w-0">
                         <h1 class="font-bold text-lg text-blue-600 leading-none">SmartKas</h1>
-                        <span class="text-xs text-gray-400">MANAJEMEN KAS KELAS</span>
+                        <span class="text-xs text-gray-400 leading-tight block">MANAJEMEN KAS KELAS</span>
                     </div>
                 </div>
                 <button id="sidebarClose" type="button" aria-label="Tutup menu"
-                        class="md:hidden text-gray-400 hover:text-gray-600 p-1">
+                        class="md:hidden text-gray-400 hover:text-gray-600 p-1 shrink-0">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>

@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+/*
+ * Mobile - ukuran umum (Export Kit)
+ * Baseline (patokan dasar): 360px
+ * Rentang umum: 320px - 480px (mencakup 320, 360, 375, 390, 414, 428, 480)
+ * Breakpoint default Tailwind (sm/md/lg/xl/2xl) tetap dipertahankan.
+ */
+@theme {
+  --breakpoint-2xs: 320px;
+  --breakpoint-xs: 360px;
+}
+
+@layer base {
+  html {
+    /* Patokan mobile 360px; dukung rentang umum 320px-480px */
+    min-width: 320px;
+  }
+
+  body {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}

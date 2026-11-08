@@ -12,6 +12,8 @@
     <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-6 sm:p-8 space-y-6">
         <!-- Header -->
         <div class="text-center">
+            <img src="{{ asset('images/logo-smartkas.jpg') }}" alt="Logo SmartKas" class="h-16 w-auto mx-auto mb-2 rounded-lg object-contain">
+            <h2 class="text-xl font-bold text-blue-600 mb-2">SmartKas</h2>
             <span class="text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
                 Sistem Kas Auditable & Terbuka
             </span>
