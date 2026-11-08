@@ -41,7 +41,7 @@
                                         data-tanggal="{{ $b->pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($b->pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}"
                                         data-metode="{{ ucfirst($b->pembayaran->metode ?? '-') }}"
                                         data-file="{{ $b->nama_file }}"
-                                        data-path="{{ $b->file_path }}"
+                                        data-path="{{ asset($b->file_path) }}"
                                         data-status="{{ $b->status_verifikasi }}"
                                         data-id="{{ $b->id_bukti }}"
                                         class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg transition"

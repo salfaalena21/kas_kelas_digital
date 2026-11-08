@@ -2,18 +2,33 @@
 
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_the_application_redirects_to_login(): void
     {
-        $response = $this->get('/');
+        $this->get('/')->assertRedirect('/login');
+    }
 
-        $response->assertStatus(200);
+    public function test_login_page_is_accessible(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('SmartKas');
+    }
+
+    public function test_admin_dashboard_renders_cash_flow_and_status_charts(): void
+    {
+        $admin = User::where('username', 'admin')->first();
+
+        $this->assertNotNull($admin, 'Akun admin tidak ditemukan. Jalankan seeder terlebih dahulu.');
+
+        $this->actingAs($admin)
+            ->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('adminKasChart', false)
+            ->assertSee('adminStatusChart', false);
     }
 }

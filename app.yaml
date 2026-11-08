@@ -1,11 +1,15 @@
 kind: wasmer.io/App.v0
-owner: GANTI_USERNAME_WASMER
+owner: salfaalena21
 name: smartkas
 package: .
 description: SmartKas - Sistem Informasi Pengelolaan Kas Kelas Digital
 
 scaling:
   mode: single_concurrency
+
+locality:
+  regions:
+    - fr-roub1
 
 capabilities:
   database:
@@ -14,14 +18,24 @@ capabilities:
     requests:
       - path: /login
 
+volumes:
+  - name: storage
+    mount: /data
+
 env:
   APP_ENV: production
   APP_DEBUG: "false"
   APP_URL: https://smartkas.wasmer.app
+  APP_LOCALE: id
+  APP_FALLBACK_LOCALE: en
   DB_CONNECTION: mysql
+  MYSQL_ATTR_SSL_VERIFY_SERVER_CERT: "false"
   SESSION_DRIVER: database
   CACHE_STORE: database
   QUEUE_CONNECTION: database
   FILESYSTEM_DISK: public
   LOG_CHANNEL: stderr
-  VIEW_COMPILED_PATH: /tmp
+  LOG_LEVEL: error
+  VIEW_COMPILED_PATH: /tmp/views
+  LARAVEL_STORAGE_PATH: /data/storage
+app_id: da_Ko6IotJULv6V

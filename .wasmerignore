@@ -1,0 +1,29 @@
+# File yang tidak boleh ikut dipaketkan ke Wasmer Edge
+.env
+.env.*
+!.env.example
+
+# Artefak pengembangan
+node_modules/
+.git/
+.github/
+tests/
+phpunit.xml
+phpunit.xml.dist
+.phpunit.result.cache
+*.webc
+
+# Cache, log, dan upload lokal
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/*
+public/hot
+
+# Symlink lokal tidak dipakai di Wasmer (file disajikan lewat route /storage)
+public/storage
+
+# Database lokal
+database/*.sqlite
+database/*.sql

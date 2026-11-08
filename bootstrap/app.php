@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\RoleMiddleware;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+// Paket PHP di Wasmer Edge tidak memuat ekstensi mbstring, sedangkan
+// symfony/polyfill-mbstring versi ini tidak lagi menyediakan mb_split().
+// Laravel memakai mb_split() di Str::studly(), jadi kita lengkapi sendiri.
+if (! function_exists('mb_split')) {
+    function mb_split(string $pattern, string $string, int $limit = -1): array|false
+    {
+        return preg_split('/'.str_replace('/', '\/', $pattern).'/u', $string, $limit);
+    }
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
