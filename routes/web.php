@@ -492,16 +492,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::get('/upload-bukti', function () {
         $siswaSaya = \Illuminate\Support\Facades\Auth::user()->siswa;
         $buktiSaya = collect();
+        $iuranList = \App\Models\Iuran::orderBy('id_iuran', 'desc')->get();
+        $iuranDipilih = $iuranList->first();
         if ($siswaSaya) {
             $buktiSaya = \App\Models\BuktiPembayaran::with(['pembayaran.iuran'])
                 ->whereHas('pembayaran', fn ($q) => $q->where('id_siswa', $siswaSaya->id_siswa))
                 ->orderBy('id_bukti', 'desc')->get();
+            $lunasIuranIds = \App\Models\Pembayaran::where('id_siswa', $siswaSaya->id_siswa)
+                ->where('status', 'lunas')->pluck('id_iuran')->all();
+            $belum = $iuranList->first(fn ($i) => ! in_array($i->id_iuran, $lunasIuranIds));
+            if ($belum) {
+                $iuranDipilih = $belum;
+            }
         }
-        return view('siswa.upload', compact('siswaSaya', 'buktiSaya'));
+        return view('siswa.upload', compact('siswaSaya', 'buktiSaya', 'iuranList', 'iuranDipilih'));
     })->name('siswa.upload');
 
     Route::post('/upload-bukti', function (Illuminate\Http\Request $request) {
         $request->validate([
+            'id_iuran' => 'required|exists:iuran,id_iuran',
             'metode' => 'required|in:tunai,transfer',
             'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
@@ -510,17 +519,29 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             return back()->with('error', 'Data siswa tidak ditemukan.');
         }
 
+        $iuran = \App\Models\Iuran::findOrFail($request->id_iuran);
+
+        // Cari pembayaran untuk (siswa, iuran) yang dipilih; jika belum ada, buat otomatis (pending)
         $pembayaran = \App\Models\Pembayaran::where('id_siswa', $siswaSaya->id_siswa)
-            ->orderBy('tanggal_bayar', 'desc')
+            ->where('id_iuran', $iuran->id_iuran)
             ->orderBy('id_pembayaran', 'desc')
             ->first();
 
         if (! $pembayaran) {
-            return back()->with('error', 'Belum ada data pembayaran untuk dikaitkan dengan bukti.');
+            $pembayaran = \App\Models\Pembayaran::create([
+                'id_siswa' => $siswaSaya->id_siswa,
+                'id_iuran' => $iuran->id_iuran,
+                'id_user' => null,
+                'tanggal_bayar' => now()->toDateString(),
+                'nominal_bayar' => $iuran->nominal ?? 0,
+                'kembalian' => 0,
+                'metode' => $request->metode,
+                'status' => 'pending',
+            ]);
+        } else {
+            $pembayaran->metode = $request->metode;
+            $pembayaran->save();
         }
-
-        $pembayaran->metode = $request->metode;
-        $pembayaran->save();
 
         $file = $request->file('proof_file');
         $path = $file->store('bukti', 'public');
@@ -531,7 +552,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
             'file_path' => 'storage/' . $path,
             'status_verifikasi' => 'pending',
         ]);
-        return back()->with('success', 'Bukti berhasil diupload.');
+        return back()->with('success', 'Bukti berhasil diupload dan dikaitkan ke pembayaran.');
     })->name('siswa.upload.store');
 });
 

@@ -18,8 +18,23 @@
         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <i class="fa-solid fa-plus-circle text-blue-600"></i> Upload Baru
         </h2>
+        @if(($iuranList ?? collect())->isEmpty())
+            <p class="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3">Belum ada data iuran/tagihan. Hubungi bendahara untuk menambahkan iuran terlebih dahulu.</p>
+        @else
         <form action="{{ route('siswa.upload.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Iuran / Tagihan</label>
+                <select name="id_iuran" required class="w-full px-3 py-2 border {{ $errors->has('id_iuran') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Pilih iuran --</option>
+                    @foreach($iuranList as $i)
+                        <option value="{{ $i->id_iuran }}" {{ (string) old('id_iuran', $iuranDipilih->id_iuran ?? '') === (string) $i->id_iuran ? 'selected' : '' }}>
+                            {{ $i->periode ?? '-' }} {{ $i->minggu ? '(' . $i->minggu . ')' : '' }} - Rp {{ number_format($i->nominal ?? 0, 0, ',', '.') }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('id_iuran')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
+            </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
                 <select name="metode" required class="w-full px-3 py-2 border {{ $errors->has('metode') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -39,6 +54,7 @@
                 <i class="fa-solid fa-upload me-1"></i> Upload Bukti
             </button>
         </form>
+        @endif
     </div>
 
     <!-- Riwayat Upload -->
@@ -49,6 +65,7 @@
                 <thead class="bg-gray-50 text-gray-700 uppercase text-xs font-semibold">
                     <tr>
                         <th class="p-3 rounded-l-xl">No</th>
+                        <th class="p-3">Iuran</th>
                         <th class="p-3">File</th>
                         <th class="p-3">Metode</th>
                         <th class="p-3 rounded-r-xl">Status Verifikasi</th>
@@ -58,6 +75,7 @@
                     @forelse($buktiSaya as $i => $b)
                         <tr class="hover:bg-gray-50">
                             <td class="p-3">{{ $i + 1 }}</td>
+                            <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                             <td class="p-3">
                                 <a href="{{ asset($b->file_path) }}" target="_blank" class="text-blue-600 hover:underline text-xs font-semibold">
                                     <i class="fa-solid fa-image me-1"></i>{{ $b->nama_file }}
@@ -75,7 +93,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
+                        <tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
                     @endforelse
                 </tbody>
             </table>
