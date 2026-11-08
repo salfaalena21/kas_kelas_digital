@@ -3,11 +3,16 @@
 @section('title', 'Catat Transaksi')
 
 @section('content')
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-6 border-b pb-4">
-        <h1 class="text-2xl font-bold text-gray-800">Pencatatan Kas Kelas</h1>
-        <a href="{{ route('bendahara.dashboard') }}" class="text-blue-600 hover:underline text-sm">&larr; Kembali ke Dashboard</a>
+<div class="max-w-4xl mx-auto">
+    <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex flex-wrap items-center justify-between gap-3 relative overflow-hidden mb-6">
+        <div class="relative z-10">
+            <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block"><i class="fa-solid fa-pen-to-square mr-1"></i> Bendahara</span>
+            <h1 class="text-2xl font-bold mb-1">Pencatatan Kas Kelas</h1>
+            <p class="text-blue-100 text-sm">Ringkasan transaksi kas kelas</p>
+        </div>
+        <a href="{{ route('bendahara.dashboard') }}" class="relative z-10 bg-white/15 hover:bg-white/25 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition border border-white/20">&larr; Kembali ke Dashboard</a>
     </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
 
     <div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl mb-4 text-sm">
         Halaman ini sudah digantikan oleh <a href="{{ route('bendahara.pembayaran') }}" class="font-semibold underline">Kas Masuk & Bayar</a>
@@ -36,6 +41,7 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
     </div>
 </div>
 @endsection

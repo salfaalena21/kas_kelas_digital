@@ -3,13 +3,13 @@
 @section('title', 'Data User')
 
 @section('content')
-<div class="flex justify-between items-center mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
-            <i class="fa-solid fa-users-gear text-blue-600"></i> Data User
-        </h1>
-        <p class="text-sm text-gray-500">Kelola akun login: Siswa, Bendahara, &amp; Wali Kelas • {{ $users->count() }} akun terdaftar</p>
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
+    <div class="relative z-10">
+        <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block"><i class="fa-solid fa-users-gear mr-1"></i> Data User</span>
+        <h1 class="text-2xl font-bold mb-1">Data User</h1>
+        <p class="text-blue-100 text-sm">Kelola akun login: Siswa, Bendahara, &amp; Wali Kelas &middot; {{ $users->count() }} akun terdaftar</p>
     </div>
+    <div class="hidden md:block opacity-20 text-7xl pr-4"><i class="fa-solid fa-users-gear"></i></div>
 </div>
 
 <div class="grid grid-cols-1 gap-6">

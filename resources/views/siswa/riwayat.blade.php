@@ -3,11 +3,13 @@
 @section('title', 'Riwayat Pembayaran Saya')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
-        <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Riwayat Pembayaran Saya
-    </h1>
-    <p class="text-sm text-gray-500">{{ $siswaSaya->nama ?? '' }} ({{ $siswaSaya->nis ?? '' }}) • {{ $siswaSaya->kelas->nama_kelas ?? '' }}</p>
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
+    <div class="relative z-10">
+        <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Siswa</span>
+        <h1 class="text-2xl font-bold mb-1">Riwayat Pembayaran Saya</h1>
+        <p class="text-blue-100 text-sm">{{ $siswaSaya->nama ?? '' }} ({{ $siswaSaya->nis ?? '' }}) &middot; {{ $siswaSaya->kelas->nama_kelas ?? '' }}</p>
+    </div>
+    <div class="hidden md:block opacity-20 text-7xl pr-4"><i class="fa-solid fa-clock-rotate-left"></i></div>
 </div>
 
 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">

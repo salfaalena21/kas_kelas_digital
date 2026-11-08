@@ -3,25 +3,36 @@
 @section('title', 'Laporan Kas')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
-        <i class="fa-solid fa-file-lines text-indigo-600"></i> Laporan Kas Kelas
-    </h1>
-    <p class="text-sm text-gray-500">Rekap pemasukan (pembayaran) & pengeluaran</p>
+<div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
+    <div class="relative z-10">
+        <span class="bg-white/10 text-white text-xs px-3 py-1 rounded-full font-medium mb-3 inline-block"><i class="fa-solid fa-file-lines mr-1"></i> Wali Kelas</span>
+        <h1 class="text-2xl font-bold mb-1">Laporan Kas Kelas</h1>
+        <p class="text-indigo-100 text-sm">Rekap pemasukan (pembayaran) & pengeluaran</p>
+    </div>
+    <div class="hidden md:block opacity-20 text-7xl pr-4"><i class="fa-solid fa-file-invoice-dollar"></i></div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
-    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-        <p class="text-xs text-gray-400 font-medium">Total Pemasukan</p>
-        <h3 class="text-2xl font-bold text-green-600 mt-1">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h3>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Pemasukan</p>
+            <h4 class="text-2xl font-bold text-green-600">Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-wallet"></i></div>
     </div>
-    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-        <p class="text-xs text-gray-400 font-medium">Total Pengeluaran</p>
-        <h3 class="text-2xl font-bold text-red-500 mt-1">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h3>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Pengeluaran</p>
+            <h4 class="text-2xl font-bold text-red-500">Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
     </div>
-    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-        <p class="text-xs text-gray-400 font-medium">Saldo Akhir</p>
-        <h3 class="text-2xl font-bold text-indigo-600 mt-1">Rp {{ number_format($saldo, 0, ',', '.') }}</h3>
+    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Saldo Akhir</p>
+            <h4 class="text-2xl font-bold text-indigo-600">Rp {{ number_format($saldo, 0, ',', '.') }}</h4>
+        </div>
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl"><i class="fa-solid fa-scale-balanced"></i></div>
     </div>
 </div>
 
