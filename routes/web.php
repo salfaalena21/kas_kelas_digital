@@ -143,60 +143,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         return back()->with('success', 'Siswa berhasil dihapus.');
     })->name('admin.siswa.destroy');
 
-    Route::get('/iuran', function () {
-        $iuran = \App\Models\Iuran::withCount('pembayaran')->orderBy('id_iuran', 'desc')->get();
-        return view('admin.iuran.index', compact('iuran'));
-    })->name('admin.iuran.index');
-    Route::post('/iuran', function (Illuminate\Http\Request $request) {
-        $request->validate([
-            'periode' => 'required|string|max:50',
-            'minggu' => 'nullable|string|max:50',
-            'nominal' => 'required|numeric|min:0',
-        ]);
-        \App\Models\Iuran::create($request->only('periode', 'minggu', 'nominal', 'tanggal_jatuh_tempo'));
-        return back()->with('success', 'Iuran berhasil ditambahkan.');
-    })->name('admin.iuran.store');
-    Route::put('/iuran/{iuran}', function (Illuminate\Http\Request $request, \App\Models\Iuran $iuran) {
-        $request->validate([
-            'periode' => 'required|string|max:50',
-            'minggu' => 'nullable|string|max:50',
-            'nominal' => 'required|numeric|min:0',
-        ]);
-        $iuran->update($request->only('periode', 'minggu', 'nominal', 'tanggal_jatuh_tempo'));
-        return back()->with('success', 'Iuran berhasil diperbarui.');
-    })->name('admin.iuran.update');
-    Route::delete('/iuran/{iuran}', function (\App\Models\Iuran $iuran) {
-        $iuran->delete();
-        return back()->with('success', 'Iuran berhasil dihapus.');
-    })->name('admin.iuran.destroy');
-
-    Route::get('/pengeluaran', function () {
-        $pengeluaran = \App\Models\Pengeluaran::orderBy('tanggal', 'desc')->get();
-        return view('admin.pengeluaran.index', compact('pengeluaran'));
-    })->name('admin.pengeluaran.index');
-    Route::post('/pengeluaran', function (Illuminate\Http\Request $request) {
-        $request->validate([
-            'tanggal' => 'required|date',
-            'keterangan' => 'required|string|max:255',
-            'jumlah' => 'required|numeric|min:0',
-        ]);
-        \App\Models\Pengeluaran::create($request->only('tanggal', 'keterangan', 'jumlah'));
-        return back()->with('success', 'Pengeluaran berhasil ditambahkan.');
-    })->name('admin.pengeluaran.store');
-    Route::put('/pengeluaran/{pengeluaran}', function (Illuminate\Http\Request $request, \App\Models\Pengeluaran $pengeluaran) {
-        $request->validate([
-            'tanggal' => 'required|date',
-            'keterangan' => 'required|string|max:255',
-            'jumlah' => 'required|numeric|min:0',
-        ]);
-        $pengeluaran->update($request->only('tanggal', 'keterangan', 'jumlah'));
-        return back()->with('success', 'Pengeluaran berhasil diperbarui.');
-    })->name('admin.pengeluaran.update');
-    Route::delete('/pengeluaran/{pengeluaran}', function (\App\Models\Pengeluaran $pengeluaran) {
-        $pengeluaran->delete();
-        return back()->with('success', 'Pengeluaran berhasil dihapus.');
-    })->name('admin.pengeluaran.destroy');
-
     Route::get('/laporan', function () {
         $pemasukan = \App\Models\Pembayaran::sum('nominal_bayar');
         $pengeluaran = \App\Models\Pengeluaran::sum('jumlah');

@@ -68,14 +68,6 @@
                        class="flex items-center space-x-3 px-3 py-2.5 rounded-xl {{ request()->is('admin/siswa*') ? 'bg-blue-600 text-white font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-user-graduate"></i><span>Data Siswa</span>
                     </a>
-                    <a href="{{ url('/admin/iuran') }}"
-                       class="flex items-center space-x-3 px-3 py-2.5 rounded-xl {{ request()->is('admin/iuran*') ? 'bg-blue-600 text-white font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <i class="fa-solid fa-coins"></i><span>Iuran</span>
-                    </a>
-                    <a href="{{ url('/admin/pengeluaran') }}"
-                       class="flex items-center space-x-3 px-3 py-2.5 rounded-xl {{ request()->is('admin/pengeluaran*') ? 'bg-blue-600 text-white font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <i class="fa-solid fa-receipt"></i><span>Pengeluaran</span>
-                    </a>
                     <a href="{{ url('/admin/laporan') }}"
                        class="flex items-center space-x-3 px-3 py-2.5 rounded-xl {{ request()->is('admin/laporan*') ? 'bg-blue-600 text-white font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
                         <i class="fa-solid fa-file-lines"></i><span>Laporan Kas</span>
