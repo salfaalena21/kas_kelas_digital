@@ -45,7 +45,6 @@
                                         data-tagihan="{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}"
                                         data-bayar="Rp {{ number_format($b->pembayaran->nominal_bayar ?? 0, 0, ',', '.') }}"
                                         data-tanggal="{{ $b->pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($b->pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}"
-                                        data-metode="{{ ucfirst($b->pembayaran->metode ?? '-') }}"
                                         data-file="{{ $b->nama_file }}"
                                         data-path="{{ asset(\Illuminate\Support\Str::startsWith($b->file_path, 'storage/') ? $b->file_path : 'storage/' . ltrim($b->file_path, '/')) }}"
                                         data-status="{{ $b->status_verifikasi }}"
@@ -106,8 +105,8 @@
                 <p id="lihat_bayar" class="font-semibold text-green-600"></p>
             </div>
             <div class="bg-gray-50 rounded-xl p-3">
-                <p class="text-xs text-gray-400 font-medium">Tanggal / Metode</p>
-                <p class="font-semibold text-gray-800"><span id="lihat_tanggal"></span> • <span id="lihat_metode"></span></p>
+                <p class="text-xs text-gray-400 font-medium">Tanggal Bayar</p>
+                <p id="lihat_tanggal" class="font-semibold text-gray-800"></p>
             </div>
         </div>
 
@@ -153,7 +152,6 @@
         document.getElementById('lihat_tagihan').textContent = btn.dataset.tagihan;
         document.getElementById('lihat_bayar').textContent = btn.dataset.bayar;
         document.getElementById('lihat_tanggal').textContent = btn.dataset.tanggal;
-        document.getElementById('lihat_metode').textContent = btn.dataset.metode;
         document.getElementById('lihat_file').textContent = btn.dataset.file;
         document.getElementById('lihat_path').textContent = btn.dataset.path;
         document.getElementById('lihat_open_link').href = btn.dataset.path;

@@ -58,7 +58,6 @@
                         <th class="p-3 rounded-l-xl">No</th>
                         <th class="p-3">Iuran</th>
                         <th class="p-3">File</th>
-                        <th class="p-3">Metode</th>
                         <th class="p-3 rounded-r-xl">Status Verifikasi</th>
                     </tr>
                 </thead>
@@ -72,7 +71,6 @@
                                     <i class="fa-solid fa-image me-1"></i>{{ $b->nama_file }}
                                 </a>
                             </td>
-                            <td class="p-3 capitalize">{{ $b->pembayaran->metode ?? '-' }}</td>
                             <td class="p-3">
                                 @if($b->status_verifikasi === 'verified')
                                     <span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-semibold">Terverifikasi</span>
@@ -84,7 +82,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
+                        <tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada bukti yang diupload.</td></tr>
                     @endforelse
                 </tbody>
             </table>
