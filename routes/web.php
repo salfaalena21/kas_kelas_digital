@@ -375,8 +375,15 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
         $request->validate([
             'tanggal' => 'required|date',
             'keterangan' => 'required',
-            'jumlah' => 'required|numeric',
+            'jumlah' => 'required|numeric|min:1',
         ]);
+        $saldoKas = (float) \App\Models\Pembayaran::sum('nominal_bayar') - (float) \App\Models\Pengeluaran::sum('jumlah');
+        $jumlah = (float) $request->jumlah;
+        if ($jumlah > $saldoKas) {
+            return back()->withInput()->withErrors([
+                'jumlah' => 'Saldo kas tidak mencukupi. Saldo tersedia Rp ' . number_format(max($saldoKas, 0), 0, ',', '.') . ', pengeluaran diminta Rp ' . number_format($jumlah, 0, ',', '.') . '.',
+            ])->with('error', 'Pengeluaran gagal: saldo kas tidak mencukupi.');
+        }
         \App\Models\Pengeluaran::create($request->only('tanggal', 'keterangan', 'jumlah'));
         return back()->with('success', 'Pengeluaran berhasil dicatat.');
     })->name('bendahara.pengeluaran.store');
@@ -385,8 +392,16 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
         $request->validate([
             'tanggal' => 'required|date',
             'keterangan' => 'required',
-            'jumlah' => 'required|numeric',
+            'jumlah' => 'required|numeric|min:1',
         ]);
+        $saldoKas = (float) \App\Models\Pembayaran::sum('nominal_bayar') - (float) \App\Models\Pengeluaran::sum('jumlah');
+        $saldoTersedia = $saldoKas + (float) $pengeluaran->jumlah; // kembalikan nominal lama sebelum ganti
+        $jumlah = (float) $request->jumlah;
+        if ($jumlah > $saldoTersedia) {
+            return back()->withInput()->withErrors([
+                'jumlah' => 'Saldo kas tidak mencukupi. Saldo tersedia Rp ' . number_format(max($saldoTersedia, 0), 0, ',', '.') . ', pengeluaran diminta Rp ' . number_format($jumlah, 0, ',', '.') . '.',
+            ])->with('error', 'Pengeluaran gagal: saldo kas tidak mencukupi.');
+        }
         $pengeluaran->update($request->only('tanggal', 'keterangan', 'jumlah'));
         return back()->with('success', 'Pengeluaran berhasil diperbarui.');
     })->name('bendahara.pengeluaran.update');

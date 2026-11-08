@@ -21,15 +21,18 @@
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                <input type="text" name="keterangan" placeholder="Contoh: Beli Spidol & Penghapus" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
+                <input type="text" name="keterangan" value="{{ old('keterangan') }}" placeholder="Contoh: Beli Spidol & Penghapus" class="w-full px-3 py-2 border {{ $errors->has('keterangan') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
+                @error('keterangan')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah (Rp)</label>
-                <input type="number" name="jumlah" placeholder="Contoh: 15000" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
+                <input type="number" name="jumlah" value="{{ old('jumlah') }}" min="1" step="1" placeholder="Contoh: 15000" class="w-full px-3 py-2 border {{ $errors->has('jumlah') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
+                @error('jumlah')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
+                <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" class="w-full px-3 py-2 border {{ $errors->has('tanggal') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm focus:ring-2 focus:ring-red-500 focus:outline-none" required>
+                @error('tanggal')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 rounded-xl text-sm transition">
                 <i class="fa-solid fa-save me-1"></i> Simpan Pengeluaran
