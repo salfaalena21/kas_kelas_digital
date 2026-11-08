@@ -10,9 +10,39 @@ Route::get('/', function () {
 // Sajikan file upload dari disk publik untuk hosting tanpa symlink public/storage.
 Route::get('/storage/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);
+    $path = ltrim($path, '/');
     $disk = \Illuminate\Support\Facades\Storage::disk('public');
-    abort_unless($disk->exists($path), 404);
-    return $disk->response($path);
+
+    $candidates = array_values(array_unique(array_filter([
+        $path,
+        preg_replace('#^storage/#', '', $path),
+        preg_replace('#^public/#', '', $path),
+    ])));
+
+    foreach ($candidates as $p) {
+        if ($disk->exists($p)) {
+            $full = $disk->path($p);
+            $mime = @mime_content_type($full) ?: 'application/octet-stream';
+            return response()->file($full, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($full) . '"',
+            ]);
+        }
+    }
+
+    // Fallback: coba path absolut di storage publik
+    foreach ($candidates as $p) {
+        $full = storage_path('app/public/' . $p);
+        if (is_file($full)) {
+            $mime = @mime_content_type($full) ?: 'application/octet-stream';
+            return response()->file($full, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($full) . '"',
+            ]);
+        }
+    }
+
+    abort(404);
 })->where('path', '.*');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
