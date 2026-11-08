@@ -1,5 +1,9 @@
 <?php
 
+// Buffer output defensively so stray BOM/whitespace from included files
+// does not prevent Laravel from sending session cookies and redirects.
+ob_start();
+
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
