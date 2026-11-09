@@ -8,6 +8,17 @@ Route::get('/', function () {
 });
 
 // Sajikan file upload dari disk publik (hindari konflik path public/storage di hosting).
+// One-shot migrate helper (aman: token sederhana). Hapus/abaikan setelah setup.
+Route::get('/__migrate/{token}', function (string $token) {
+    if ($token !== 'smartkas-setup-2026') abort(404);
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return '<pre>OK migrate\n' . e(\Illuminate\Support\Facades\Artisan::output()) . '</pre>';
+    } catch (\Throwable $e) {
+        return '<pre>ERR ' . e($e->getMessage()) . '</pre>';
+    }
+});
+
 Route::get('/bukti-file/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);
     $path = ltrim($path, '/');
@@ -616,14 +627,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         }
 
         $file = $request->file('proof_file');
-        $path = $file->store('bukti', 'public');
+        $mime = $file->getMimeType() ?: 'application/octet-stream';
+        $data = @file_get_contents($file->getRealPath());
+        $fileData = $data !== false ? ('data:' . $mime . ';base64,' . base64_encode($data)) : null;
 
-        \App\Models\BuktiPembayaran::create([
+        // simpan juga ke disk (best-effort)
+        $path = 'bukti/' . $file->hashName();
+        try { $path = $file->store('bukti', 'public') ?: $path; } catch (\Throwable $e) {}
+
+        $payload = [
             'id_pembayaran' => $pembayaran->id_pembayaran,
             'nama_file' => $file->getClientOriginalName(),
             'file_path' => 'storage/' . $path,
             'status_verifikasi' => 'pending',
-        ]);
+        ];
+        try {
+            \App\Models\BuktiPembayaran::create($payload + ['file_data' => $fileData]);
+        } catch (\Throwable $e) {
+            \App\Models\BuktiPembayaran::create($payload);
+        }
         return back()->with('success', 'Bukti berhasil diupload dan dikaitkan ke pembayaran.');
     })->name('siswa.upload.store');
 });

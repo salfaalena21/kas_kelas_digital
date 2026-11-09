@@ -13,6 +13,7 @@ class BuktiPembayaran extends Model
         'id_pembayaran',
         'nama_file',
         'file_path',
+        'file_data',
         'status_verifikasi',
     ];
 

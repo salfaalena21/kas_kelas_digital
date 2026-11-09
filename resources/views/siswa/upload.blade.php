@@ -68,7 +68,7 @@
                             <td class="p-3">{{ $i + 1 }}</td>
                             <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                             <td class="p-3">
-                                @php $fUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')); $isImg = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']); @endphp
+                                @php $fUrl = !empty($b->file_data) ? $b->file_data : url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')); $isImg = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']) || \Illuminate\Support\Str::startsWith((string)$b->file_data, 'data:image'); @endphp
                                 @if($isImg)
                                     <a href="{{ $fUrl }}" target="_blank" rel="noopener" class="block mb-1">
                                         <img src="{{ $fUrl }}" alt="bukti" class="h-12 w-16 object-cover rounded-lg border border-gray-200 bg-white" loading="lazy" onerror="this.style.display='none'">

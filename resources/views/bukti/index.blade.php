@@ -24,17 +24,21 @@
                         <td class="p-3">{{ $i+1 }}</td>
                         <td class="p-3 font-medium text-gray-900">{{ $b->pembayaran->siswa->nama ?? '-' }}</td>
                         <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
-                        @php $fileUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')); @endphp
+                        @php
+                            $fileUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/'));
+                            $fileSrc = !empty($b->file_data) ? $b->file_data : $fileUrl;
+                            $isImgThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']) || \Illuminate\Support\Str::startsWith((string)$b->file_data, 'data:image');
+                            $isPdfThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.pdf']) || \Illuminate\Support\Str::startsWith((string)$b->file_data, 'data:application/pdf');
+                        @endphp
                         <td class="p-3 text-xs">
-                            @php $isImgThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']); $isPdfThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.pdf']); @endphp
                             @if($isImgThumb)
-                                <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="block mb-1">
-                                    <img src="{{ $fileUrl }}" alt="bukti" class="h-14 w-20 object-cover rounded-lg border border-gray-200 bg-white" loading="lazy" onerror="this.style.display='none'">
-                                </a>
+                                <span class="block mb-1">
+                                    <img src="{{ $fileSrc }}" alt="bukti" class="h-14 w-20 object-cover rounded-lg border border-gray-200 bg-white" loading="lazy" onerror="this.style.display='none'">
+                                </span>
                             @elseif($isPdfThumb)
-                                <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mb-1 text-[11px] bg-red-50 text-red-700 px-2 py-1 rounded-lg border border-red-100"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+                                <span class="inline-flex items-center gap-1 mb-1 text-[11px] bg-red-50 text-red-700 px-2 py-1 rounded-lg border border-red-100"><i class="fa-solid fa-file-pdf"></i> PDF</span>
                             @endif
-                            <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline font-semibold">{{ $b->nama_file }}</a>
+                            <a href="{{ $fileSrc }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline font-semibold">{{ $b->nama_file }}</a>
                         </td>
                         <td class="p-3">
                             @if($b->status_verifikasi === 'verified')
@@ -53,7 +57,7 @@
                                         data-bayar="Rp {{ number_format($b->pembayaran->nominal_bayar ?? 0, 0, ',', '.') }}"
                                         data-tanggal="{{ $b->pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($b->pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}"
                                         data-file="{{ $b->nama_file }}"
-                                        data-path="{{ url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')) }}"
+                                        data-path="{{ !empty($b->file_data) ? $b->file_data : url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')) }}"
                                         data-status="{{ $b->status_verifikasi }}"
                                         data-id="{{ $b->id_bukti }}"
                                         class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg transition"
