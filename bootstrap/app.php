@@ -18,7 +18,7 @@ if (! function_exists('mb_split')) {
     }
 }
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -59,3 +59,11 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect('/login')->with('error', 'Sesi Anda telah berakhir, silakan login kembali.');
         });
     })->create();
+
+// Hormati LARAVEL_STORAGE_PATH (mis. volume Wasmer /data/storage) agar upload & file persisten.
+$storagePath = $_SERVER['LARAVEL_STORAGE_PATH'] ?? $_ENV['LARAVEL_STORAGE_PATH'] ?? getenv('LARAVEL_STORAGE_PATH') ?: null;
+if (is_string($storagePath) && $storagePath !== '' && is_dir(dirname($storagePath))) {
+    $app->useStoragePath($storagePath);
+}
+
+return $app;

@@ -30,15 +30,23 @@ Route::get('/storage/{path}', function (string $path) {
         }
     }
 
-    // Fallback: coba path absolut di storage publik
-    foreach ($candidates as $p) {
-        $full = storage_path('app/public/' . $p);
-        if (is_file($full)) {
-            $mime = @mime_content_type($full) ?: 'application/octet-stream';
-            return response()->file($full, [
-                'Content-Type' => $mime,
-                'Content-Disposition' => 'inline; filename="' . basename($full) . '"',
-            ]);
+    // Fallback: coba path absolut (termasuk lokasi non-volume & LARAVEL_STORAGE_PATH)
+    $roots = array_filter(array_unique([
+        storage_path('app/public'),
+        base_path('storage/app/public'),
+        rtrim((string) (env('LARAVEL_STORAGE_PATH') ?: ''), '/\\') . '/app/public',
+        '/data/storage/app/public',
+    ]));
+    foreach ($roots as $root) {
+        foreach ($candidates as $p) {
+            $full = rtrim($root, '/\\') . '/' . ltrim($p, '/\\');
+            if (is_file($full)) {
+                $mime = @mime_content_type($full) ?: 'application/octet-stream';
+                return response()->file($full, [
+                    'Content-Type' => $mime,
+                    'Content-Disposition' => 'inline; filename="' . basename($full) . '"',
+                ]);
+            }
         }
     }
 
