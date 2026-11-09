@@ -631,14 +631,27 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $data = @file_get_contents($file->getRealPath());
         $fileData = $data !== false ? ('data:' . $mime . ';base64,' . base64_encode($data)) : null;
 
-        // simpan juga ke disk (best-effort)
-        $path = 'bukti/' . $file->hashName();
-        try { $path = $file->store('bukti', 'public') ?: $path; } catch (\Throwable $e) {}
+        // simpan ke disk (best-effort) - pastikan folder ada
+        $relPath = 'bukti/' . $file->hashName();
+        $storedPath = $relPath;
+        try {
+            $dir = storage_path('app/public/bukti');
+            if (! is_dir($dir)) { @mkdir($dir, 0775, true); }
+            $stored = $file->storeAs('bukti', $file->hashName(), 'public');
+            if (is_string($stored) && $stored !== '') {
+                $storedPath = $stored;
+            } else {
+                $target = $dir . '/' . $file->hashName();
+                if (@move_uploaded_file($file->getRealPath(), $target) || @copy($file->getRealPath(), $target)) {
+                    $storedPath = $relPath;
+                }
+            }
+        } catch (\Throwable $e) {}
 
         $payload = [
             'id_pembayaran' => $pembayaran->id_pembayaran,
             'nama_file' => $file->getClientOriginalName(),
-            'file_path' => 'storage/' . $path,
+            'file_path' => 'storage/' . ltrim($storedPath, '/'),
             'status_verifikasi' => 'pending',
         ];
         try {
@@ -646,7 +659,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         } catch (\Throwable $e) {
             \App\Models\BuktiPembayaran::create($payload);
         }
-        return back()->with('success', 'Bukti berhasil diupload dan dikaitkan ke pembayaran.');
+        return back()->with('success', 'Bukti berhasil diupload. Foto/bukti dapat langsung dilihat.');
     })->name('siswa.upload.store');
 });
 
