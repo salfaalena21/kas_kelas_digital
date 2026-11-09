@@ -24,7 +24,7 @@
                         <td class="p-3">{{ $i+1 }}</td>
                         <td class="p-3 font-medium text-gray-900">{{ $b->pembayaran->siswa->nama ?? '-' }}</td>
                         <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
-                        @php $fileUrl = asset(\Illuminate\Support\Str::startsWith($b->file_path, 'storage/') ? $b->file_path : 'storage/' . ltrim($b->file_path, '/')); @endphp
+                        @php $fileUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')); @endphp
                         <td class="p-3 text-xs">
                             @if(\Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp']))
                                 <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="block mb-1">
@@ -50,7 +50,7 @@
                                         data-bayar="Rp {{ number_format($b->pembayaran->nominal_bayar ?? 0, 0, ',', '.') }}"
                                         data-tanggal="{{ $b->pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($b->pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}"
                                         data-file="{{ $b->nama_file }}"
-                                        data-path="{{ asset(\Illuminate\Support\Str::startsWith($b->file_path, 'storage/') ? $b->file_path : 'storage/' . ltrim($b->file_path, '/')) }}"
+                                        data-path="{{ url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')) }}"
                                         data-status="{{ $b->status_verifikasi }}"
                                         data-id="{{ $b->id_bukti }}"
                                         class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg transition"

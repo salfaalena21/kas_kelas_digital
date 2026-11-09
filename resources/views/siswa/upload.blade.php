@@ -67,7 +67,7 @@
                             <td class="p-3">{{ $i + 1 }}</td>
                             <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                             <td class="p-3">
-                                <a href="{{ asset($b->file_path) }}" target="_blank" class="text-blue-600 hover:underline text-xs font-semibold">
+                                <a href="{{ url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')) }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-xs font-semibold">
                                     <i class="fa-solid fa-image me-1"></i>{{ $b->nama_file }}
                                 </a>
                             </td>

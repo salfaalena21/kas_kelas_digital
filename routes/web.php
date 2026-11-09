@@ -7,7 +7,42 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-// Sajikan file upload dari disk publik untuk hosting tanpa symlink public/storage.
+// Sajikan file upload dari disk publik (hindari konflik path public/storage di hosting).
+Route::get('/bukti-file/{path}', function (string $path) {
+    abort_if(str_contains($path, '..'), 404);
+    $path = ltrim($path, '/');
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+    $candidates = array_values(array_unique(array_filter([
+        $path,
+        preg_replace('#^storage/#', '', $path),
+        preg_replace('#^public/#', '', $path),
+        preg_replace('#^bukti-file/#', '', $path),
+    ])));
+    foreach ($candidates as $p) {
+        if ($disk->exists($p)) {
+            $full = $disk->path($p);
+            $mime = @mime_content_type($full) ?: 'application/octet-stream';
+            return response()->file($full, ['Content-Type' => $mime, 'Content-Disposition' => 'inline; filename="' . basename($full) . '"']);
+        }
+    }
+    $roots = array_filter(array_unique([
+        storage_path('app/public'),
+        base_path('storage/app/public'),
+        rtrim((string) (env('LARAVEL_STORAGE_PATH') ?: ''), '/\\') . '/app/public',
+        '/data/storage/app/public',
+    ]));
+    foreach ($roots as $root) {
+        foreach ($candidates as $p) {
+            $full = rtrim($root, '/\\') . '/' . ltrim($p, '/\\');
+            if (is_file($full)) {
+                $mime = @mime_content_type($full) ?: 'application/octet-stream';
+                return response()->file($full, ['Content-Type' => $mime, 'Content-Disposition' => 'inline; filename="' . basename($full) . '"']);
+            }
+        }
+    }
+    abort(404);
+})->where('path', '.*')->name('bukti.file');
+
 Route::get('/storage/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);
     $path = ltrim($path, '/');
