@@ -584,7 +584,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
     Route::post('/upload-bukti', function (Illuminate\Http\Request $request) {
         $request->validate([
             'id_iuran' => 'required|exists:iuran,id_iuran',
-            'proof_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'proof_file' => 'required|file|mimes:jpg,jpeg,png,gif,webp,bmp,pdf|max:5120',
         ]);
         $siswaSaya = \Illuminate\Support\Facades\Auth::user()->siswa;
         if (! $siswaSaya) {

@@ -26,10 +26,13 @@
                         <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                         @php $fileUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')); @endphp
                         <td class="p-3 text-xs">
-                            @if(\Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp']))
+                            @php $isImgThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']); $isPdfThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.pdf']); @endphp
+                            @if($isImgThumb)
                                 <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="block mb-1">
                                     <img src="{{ $fileUrl }}" alt="bukti" class="h-14 w-20 object-cover rounded-lg border border-gray-200 bg-white" loading="lazy" onerror="this.style.display='none'">
                                 </a>
+                            @elseif($isPdfThumb)
+                                <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 mb-1 text-[11px] bg-red-50 text-red-700 px-2 py-1 rounded-lg border border-red-100"><i class="fa-solid fa-file-pdf"></i> PDF</a>
                             @endif
                             <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline font-semibold">{{ $b->nama_file }}</a>
                         </td>

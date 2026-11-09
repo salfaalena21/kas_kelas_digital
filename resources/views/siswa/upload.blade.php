@@ -36,10 +36,11 @@
                 @error('id_iuran')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti Transfer (JPG/PNG/PDF, maks 2MB)</label>
-                <input type="file" name="proof_file" accept="image/jpeg,image/png,image/jpg,application/pdf" required
+                <label class="block text-sm font-medium text-gray-700 mb-1">File Bukti Transfer (Foto/PDF, maks 5MB)</label>
+                <input type="file" name="proof_file" accept="image/*,application/pdf" required
                        class="w-full px-3 py-2 border {{ $errors->has('proof_file') ? 'border-red-500' : 'border-gray-300' }} rounded-xl text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold focus:outline-none">
                 @error('proof_file')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
+                <p class="text-[11px] text-gray-400 mt-1">Format yang didukung: JPG, PNG, GIF, WEBP, PDF. Setelah diupload, bukti bisa langsung dilihat.</p>
             </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
                 <i class="fa-solid fa-upload me-1"></i> Upload Bukti
@@ -67,8 +68,14 @@
                             <td class="p-3">{{ $i + 1 }}</td>
                             <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                             <td class="p-3">
-                                <a href="{{ url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')) }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-xs font-semibold">
-                                    <i class="fa-solid fa-image me-1"></i>{{ $b->nama_file }}
+                                @php $fUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')); $isImg = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']); @endphp
+                                @if($isImg)
+                                    <a href="{{ $fUrl }}" target="_blank" rel="noopener" class="block mb-1">
+                                        <img src="{{ $fUrl }}" alt="bukti" class="h-12 w-16 object-cover rounded-lg border border-gray-200 bg-white" loading="lazy" onerror="this.style.display='none'">
+                                    </a>
+                                @endif
+                                <a href="{{ $fUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline text-xs font-semibold">
+                                    <i class="fa-solid fa-file me-1"></i>{{ $b->nama_file }}
                                 </a>
                             </td>
                             <td class="p-3">
