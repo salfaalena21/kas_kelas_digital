@@ -26,8 +26,12 @@
                         <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                         @php $fileUrl = asset(\Illuminate\Support\Str::startsWith($b->file_path, 'storage/') ? $b->file_path : 'storage/' . ltrim($b->file_path, '/')); @endphp
                         <td class="p-3 text-xs">
+                            @if(\Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp']))
+                                <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="block mb-1">
+                                    <img src="{{ $fileUrl }}" alt="bukti" class="h-14 w-20 object-cover rounded-lg border border-gray-200 bg-white" loading="lazy" onerror="this.style.display='none'">
+                                </a>
+                            @endif
                             <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="text-blue-600 hover:underline font-semibold">{{ $b->nama_file }}</a>
-                            <br><span class="text-gray-400 break-all">{{ $b->file_path }}</span>
                         </td>
                         <td class="p-3">
                             @if($b->status_verifikasi === 'verified')
@@ -110,20 +114,24 @@
             </div>
         </div>
 
-        <div class="mb-2 flex items-center justify-between">
-            <p class="text-sm font-medium text-gray-700"><span id="lihat_file"></span></p>
-            <span id="lihat_status"></span>
+        <div class="mb-2 flex items-center justify-between gap-2">
+            <p class="text-sm font-medium text-gray-700 truncate"><span id="lihat_file"></span></p>
+            <div class="flex items-center gap-2 shrink-0">
+                <a id="lihat_open_link" href="#" target="_blank" rel="noopener" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-lg">Buka tab baru</a>
+                <span id="lihat_status"></span>
+            </div>
         </div>
-        <div class="bg-gray-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center min-h-[200px]">
-            <img id="lihat_img" src="" alt="Bukti transfer" class="max-h-[60vh] w-full object-contain hidden">
-            <iframe id="lihat_pdf" src="" class="w-full hidden" style="height:60vh;" title="Bukti PDF"></iframe>
-            <div id="lihat_img_fallback" style="display:none;" class="flex flex-col items-center text-gray-500 text-sm p-8 text-center gap-2">
-                <i class="fa-solid fa-file-circle-question text-3xl mb-1 text-gray-400"></i>
-                <p id="lihat_fallback_msg">Pratinjau tidak tersedia atau file tidak ditemukan.</p>
-                <a id="lihat_open_link" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka file
+        <div class="bg-gray-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center min-h-[220px]">
+            <img id="lihat_img" src="" alt="Bukti transfer" class="max-h-[65vh] w-full object-contain">
+            <iframe id="lihat_pdf" src="" class="w-full hidden" style="height:65vh;" title="Bukti PDF"></iframe>
+            <div id="lihat_img_fallback" style="display:none;" class="flex flex-col items-center text-gray-600 text-sm p-8 text-center gap-2">
+                <i class="fa-solid fa-image text-3xl mb-1 text-gray-400"></i>
+                <p id="lihat_fallback_msg" class="font-medium">Gambar belum bisa ditampilkan.</p>
+                <p class="text-xs text-gray-500">Kemungkinan file bukti ini diupload sebelum perbaikan penyimpanan, jadi filenya tidak ada di server. Minta siswa <b>upload ulang</b> bukti (setelah pembaruan ini), lalu cek lagi.</p>
+                <a id="lihat_open_link2" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg mt-1">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Coba buka file
                 </a>
-                <span class="text-xs text-gray-400 break-all">URL: <span id="lihat_path"></span></span>
+                <span class="text-[11px] text-gray-400 break-all">URL: <span id="lihat_path"></span></span>
             </div>
         </div>
 
@@ -155,6 +163,7 @@
         document.getElementById('lihat_file').textContent = btn.dataset.file;
         document.getElementById('lihat_path').textContent = btn.dataset.path;
         document.getElementById('lihat_open_link').href = btn.dataset.path;
+        var ol2 = document.getElementById('lihat_open_link2'); if (ol2) ol2.href = btn.dataset.path;
 
         const statusEl = document.getElementById('lihat_status');
         const st = btn.dataset.status;
@@ -167,12 +176,12 @@
         const img = document.getElementById('lihat_img');
         const pdf = document.getElementById('lihat_pdf');
         const fb = document.getElementById('lihat_img_fallback');
-        const fbMsg = document.getElementById('lihat_fallback_msg');
         const file = (btn.dataset.file || '').toLowerCase();
         const path = btn.dataset.path || '';
         const isPdf = file.endsWith('.pdf');
         const isImg = /\.(jpe?g|png|gif|webp|bmp)$/i.test(file);
 
+        img.onerror = null; img.onload = null;
         img.classList.add('hidden'); img.removeAttribute('src');
         pdf.classList.add('hidden'); pdf.removeAttribute('src');
         fb.style.display = 'none';
@@ -180,19 +189,15 @@
         if (isPdf) {
             pdf.src = path;
             pdf.classList.remove('hidden');
-        } else if (isImg) {
-            img.onload = function () { fb.style.display = 'none'; };
+        } else {
+            // tampilkan langsung sebagai gambar (default), termasuk jika ekstensi tidak terdeteksi
+            img.onload = function () { fb.style.display = 'none'; img.classList.remove('hidden'); };
             img.onerror = function () {
                 img.classList.add('hidden');
-                fbMsg.textContent = 'Gambar tidak dapat dimuat. File mungkin belum tersimpan di server atau path tidak valid. Coba klik "Buka file".';
                 fb.style.display = 'flex';
             };
             img.src = path;
             img.classList.remove('hidden');
-        } else {
-            fbMsg.textContent = 'Pratinjau tidak tersedia untuk tipe file ini. Klik "Buka file" untuk melihat.';
-            fb.style.display = 'flex';
-            if (path) { pdf.src = path; pdf.classList.remove('hidden'); fb.style.display = 'none'; }
         }
 
         const verifyUrl = "{{ url('bendahara/bukti') }}/" + btn.dataset.id;
