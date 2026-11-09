@@ -25,8 +25,7 @@
                         <td class="p-3 font-medium text-gray-900">{{ $b->pembayaran->siswa->nama ?? '-' }}</td>
                         <td class="p-3">{{ $b->pembayaran->iuran->periode ?? '-' }} {{ $b->pembayaran->iuran->minggu ?? '' }}</td>
                         @php
-                            $fileUrl = url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/'));
-                            $fileSrc = !empty($b->file_data) ? $b->file_data : $fileUrl;
+                            $fileSrc = route('bukti.img', $b->id_bukti);
                             $isImgThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.jpg','.jpeg','.png','.gif','.webp','.bmp']) || \Illuminate\Support\Str::startsWith((string)$b->file_data, 'data:image');
                             $isPdfThumb = \Illuminate\Support\Str::of($b->nama_file)->lower()->endsWith(['.pdf']) || \Illuminate\Support\Str::startsWith((string)$b->file_data, 'data:application/pdf');
                         @endphp
@@ -57,7 +56,7 @@
                                         data-bayar="Rp {{ number_format($b->pembayaran->nominal_bayar ?? 0, 0, ',', '.') }}"
                                         data-tanggal="{{ $b->pembayaran->tanggal_bayar ? \Carbon\Carbon::parse($b->pembayaran->tanggal_bayar)->format('d/m/Y') : '-' }}"
                                         data-file="{{ $b->nama_file }}"
-                                        data-path="{{ !empty($b->file_data) ? $b->file_data : url('/bukti-file/' . ltrim(preg_replace('#^/?storage/#', '', $b->file_path), '/')) }}"
+                                        data-path="{{ route('bukti.img', $b->id_bukti) }}"
                                         data-status="{{ $b->status_verifikasi }}"
                                         data-id="{{ $b->id_bukti }}"
                                         class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg transition"

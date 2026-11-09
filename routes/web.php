@@ -19,6 +19,30 @@ Route::get('/__migrate/{token}', function (string $token) {
     }
 });
 
+// Sajikan bukti langsung dari DB berdasarkan ID (paling andal)
+Route::get('/bukti-img/{id}', function ($id) {
+    try {
+        $bukti = \App\Models\BuktiPembayaran::findOrFail($id);
+        if (!empty($bukti->file_data) && preg_match('#^data:([^;]+);base64,(.+)$#', $bukti->file_data, $m)) {
+            $bin = base64_decode($m[2], true);
+            if ($bin !== false) {
+                return response($bin, 200, [
+                    'Content-Type' => $m[1],
+                    'Content-Disposition' => 'inline; filename="' . addslashes($bukti->nama_file ?: ('bukti-' . $id)) . '"',
+                ]);
+            }
+        }
+        $path = ltrim(preg_replace('#^/?storage/#', '', (string)$bukti->file_path), '/');
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+        if ($path && $disk->exists($path)) {
+            return $disk->response($path);
+        }
+        $full = storage_path('app/public/' . $path);
+        if ($path && is_file($full)) return response()->file($full);
+    } catch (\Throwable $e) {}
+    abort(404);
+})->name('bukti.img');
+
 Route::get('/bukti-file/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);
     $path = ltrim($path, '/');
