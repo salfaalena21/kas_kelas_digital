@@ -22,20 +22,51 @@ Route::get('/__migrate/{token}', function (string $token) {
 Route::get('/bukti-file/{path}', function (string $path) {
     abort_if(str_contains($path, '..'), 404);
     $path = ltrim($path, '/');
-    $disk = \Illuminate\Support\Facades\Storage::disk('public');
     $candidates = array_values(array_unique(array_filter([
         $path,
         preg_replace('#^storage/#', '', $path),
         preg_replace('#^public/#', '', $path),
         preg_replace('#^bukti-file/#', '', $path),
     ])));
-    foreach ($candidates as $p) {
-        if ($disk->exists($p)) {
-            $full = $disk->path($p);
-            $mime = @mime_content_type($full) ?: 'application/octet-stream';
-            return response()->file($full, ['Content-Type' => $mime, 'Content-Disposition' => 'inline; filename="' . basename($full) . '"']);
+
+    // 1) Coba sajikan dari data DB (base64) jika ada
+    try {
+        $base = basename($path);
+        $bukti = \App\Models\BuktiPembayaran::query()
+            ->whereNotNull('file_data')
+            ->where(function ($q) use ($path, $base, $candidates) {
+                foreach ($candidates as $c) {
+                    $q->orWhere('file_path', 'like', '%' . $c)
+                      ->orWhere('file_path', 'like', '%/storage/' . $c);
+                }
+                $q->orWhere('file_path', 'like', '%' . $base);
+            })
+            ->latest('id_bukti')
+            ->first();
+        if ($bukti && !empty($bukti->file_data) && preg_match('#^data:([^;]+);base64,(.+)$#', $bukti->file_data, $m)) {
+            $bin = base64_decode($m[2], true);
+            if ($bin !== false) {
+                return response($bin, 200, [
+                    'Content-Type' => $m[1],
+                    'Content-Disposition' => 'inline; filename="' . addslashes($bukti->nama_file ?: $base) . '"',
+                ]);
+            }
         }
+    } catch (\Throwable $e) {}
+
+    // 2) Disk public
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+    foreach ($candidates as $p) {
+        try {
+            if ($disk->exists($p)) {
+                $full = $disk->path($p);
+                $mime = @mime_content_type($full) ?: 'application/octet-stream';
+                return response()->file($full, ['Content-Type' => $mime, 'Content-Disposition' => 'inline; filename="' . basename($full) . '"']);
+            }
+        } catch (\Throwable $e) {}
     }
+
+    // 3) Fallback path absolut
     $roots = array_filter(array_unique([
         storage_path('app/public'),
         base_path('storage/app/public'),
