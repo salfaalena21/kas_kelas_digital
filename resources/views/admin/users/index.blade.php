@@ -58,6 +58,7 @@
                     <tr>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Nama</th>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Username</th>
+                        <th class="text-left px-4 py-3 font-medium text-gray-600">NIS</th>
                         <th class="text-left px-4 py-3 font-medium text-gray-600">Role</th>
                         <th class="text-center px-4 py-3 font-medium text-gray-600">Aksi</th>
                     </tr>
@@ -67,6 +68,7 @@
                     <tr>
                         <td class="px-4 py-3 text-gray-800">{{ $u->nama }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $u->username }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ optional($u->siswa)->nis ?? '-' }}</td>
                         <td class="px-4 py-3 text-gray-600 capitalize">{{ str_replace('_', ' ', $u->role) }}</td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-2">
