@@ -19,6 +19,30 @@ Route::get('/__migrate/{token}', function (string $token) {
     }
 });
 
+// One-shot helper: set password = username untuk semua user kecuali admin (admin tetap admin123)
+Route::get('/__fixpass/{token}', function (string $token) {
+    if ($token !== 'smartkas-setup-2026') abort(404);
+    try {
+        $users = \App\Models\User::all();
+        $updated = 0;
+        foreach ($users as $u) {
+            $username = (string) $u->username;
+            if (strtolower($username) === 'admin') {
+                $plain = 'admin123';
+            } else {
+                $plain = $username;
+            }
+            $u->password = \Illuminate\Support\Facades\Hash::make($plain);
+            $u->password_hint = \Illuminate\Support\Facades\Crypt::encryptString($plain);
+            $u->save();
+            $updated++;
+        }
+        return '<pre>OK fixpass: ' . $updated . ' user diperbarui</pre>';
+    } catch (\Throwable $e) {
+        return '<pre>ERR ' . e($e->getMessage()) . '</pre>';
+    }
+});
+
 // Sajikan bukti langsung dari DB berdasarkan ID (paling andal)
 Route::get('/bukti-img/{id}', function ($id) {
     try {
