@@ -235,6 +235,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             'username' => 'required|string|max:50|unique:users,username,' . $user->id_user . ',id_user',
             'role' => 'required|in:admin,bendahara,siswa,wali_kelas',
             'password' => 'nullable|string|min:6',
+            'nis' => 'nullable|string|max:30',
         ]);
         $user->nama = $data['nama'];
         $user->username = $data['username'];
@@ -244,6 +245,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             $user->password_hint = \Illuminate\Support\Facades\Crypt::encryptString($data['password']);
         }
         $user->save();
+
+        if (($data['role'] ?? null) === 'siswa' && $request->filled('nis')) {
+            $nis = trim((string) $request->nis);
+            $siswa = \App\Models\Siswa::where('nis', $nis)->first();
+            if ($siswa && (!$siswa->id_user || (int) $siswa->id_user === (int) $user->id_user)) {
+                // Lepas kaitan siswa lain dari user ini jika berbeda
+                \App\Models\Siswa::where('id_user', $user->id_user)
+                    ->where('id_siswa', '!=', $siswa->id_siswa)
+                    ->update(['id_user' => null]);
+                $siswa->id_user = $user->id_user;
+                $siswa->save();
+            }
+        }
+
         return back()->with('success', 'User berhasil diperbarui.');
     })->name('admin.users.update');
     Route::delete('/users/{user}', function (\App\Models\User $user) {

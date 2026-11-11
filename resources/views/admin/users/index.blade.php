@@ -72,7 +72,7 @@
                         <td class="px-4 py-3 text-gray-600 capitalize">{{ str_replace('_', ' ', $u->role) }}</td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-2">
-                                <button onclick="editUser({{ $u->id_user }}, '{{ addslashes($u->nama) }}', '{{ addslashes($u->username) }}', '{{ $u->role }}', '{{ addslashes($u->password_plain) }}')" class="w-8 h-8 inline-flex items-center justify-center bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg transition" title="Edit" aria-label="Edit">
+                                <button onclick="editUser({{ $u->id_user }}, '{{ addslashes($u->nama) }}', '{{ addslashes($u->username) }}', '{{ $u->role }}', '{{ addslashes($u->password_plain) }}', '{{ addslashes(optional($u->siswa)->nis ?? '') }}')" class="w-8 h-8 inline-flex items-center justify-center bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg transition" title="Edit" aria-label="Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </button>
                                 <form action="{{ route('admin.users.destroy', $u->id_user) }}" method="POST" onsubmit="return confirm('Hapus user ini?')" class="inline-flex">
@@ -101,13 +101,16 @@
         </div>
         <form id="editForm" method="POST" class="p-5 space-y-3">
             @csrf @method('PUT')
-            <input type="text" id="edit_nama" name="nama" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm">
-            <input type="text" id="edit_username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm">
-            <div class="relative">
-                <input type="password" id="edit_password" name="password" class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-xl text-sm">
-                <button type="button" onclick="toggleEditPassword()" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600" title="Tampilkan password" aria-label="Tampilkan password">
-                    <i id="edit_password_icon" class="fa-solid fa-eye"></i>
-                </button>
+            <input type="text" id="edit_nama" name="nama" required placeholder="Nama lengkap" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm">
+            <input type="text" id="edit_username" name="username" required placeholder="Username" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm">
+            <div>
+                <div class="relative">
+                    <input type="password" id="edit_password" name="password" placeholder="Password" class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-xl text-sm">
+                    <button type="button" onclick="toggleEditPassword()" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600" title="Tampilkan password" aria-label="Tampilkan password">
+                        <i id="edit_password_icon" class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ingin mengubah password (password lama tetap tersimpan).</p>
             </div>
             <select id="edit_role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm">
                 <option value="admin">Admin</option>
@@ -115,6 +118,10 @@
                 <option value="wali_kelas">Wali Kelas</option>
                 <option value="siswa">Siswa</option>
             </select>
+            <div id="edit_nis_wrap">
+                <label class="block text-sm font-medium text-gray-700 mb-1">NIS (untuk siswa)</label>
+                <input type="text" id="edit_nis" name="nis" placeholder="Contoh: 20141001" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm">
+            </div>
             <button class="w-full bg-blue-600 text-white py-2 rounded-xl text-sm">Update</button>
         </form>
     </div>
@@ -142,7 +149,7 @@ addNama.addEventListener('input', () => {
     if (!usernameTouched) addUsername.value = addNama.value.toLowerCase().replace(/[^a-z0-9]/g, '');
 });
 
-function editUser(id, nama, username, role, password) {
+function editUser(id, nama, username, role, password, nis) {
     document.getElementById('editForm').action = '/admin/users/' + id;
     document.getElementById('edit_nama').value = nama;
     document.getElementById('edit_username').value = username;
@@ -150,8 +157,14 @@ function editUser(id, nama, username, role, password) {
     document.getElementById('edit_password').value = password || '';
     document.getElementById('edit_password').type = 'password';
     document.getElementById('edit_password_icon').className = 'fa-solid fa-eye';
+    document.getElementById('edit_nis').value = nis || '';
+    toggleNis(document.getElementById('edit_role'), 'edit_nis_wrap');
     document.getElementById('editModal').classList.remove('hidden');
 }
+
+document.getElementById('edit_role').addEventListener('change', function() {
+    toggleNis(this, 'edit_nis_wrap');
+});
 
 function toggleEditPassword() {
     const input = document.getElementById('edit_password');
