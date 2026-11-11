@@ -20,7 +20,6 @@
                 <th class="text-left px-4 py-3 font-medium text-gray-600">Nama</th>
                 <th class="text-left px-4 py-3 font-medium text-gray-600">Kelas</th>
                 <th class="text-left px-4 py-3 font-medium text-gray-600">Akun Login</th>
-                <th class="text-center px-4 py-3 font-medium text-gray-600">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -30,16 +29,6 @@
                 <td class="px-4 py-3 text-gray-800">{{ $s->nama }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ $s->kelas->nama_kelas ?? '-' }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ $s->user->username ?? '-' }}</td>
-                <td class="px-4 py-3">
-                    <div class="flex items-center justify-center gap-2">
-                        <form action="{{ route('admin.siswa.destroy', $s->id_siswa) }}" method="POST" onsubmit="return confirm('Hapus siswa ini?')" class="inline-flex">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="w-8 h-8 inline-flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition" title="Hapus" aria-label="Hapus">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>
-                </td>
             </tr>
             @endforeach
         </tbody>
