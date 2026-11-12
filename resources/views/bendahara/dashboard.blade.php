@@ -78,42 +78,19 @@
     </div>
 </div>
 
-<!-- Grafik (sama seperti dashboard admin) -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-chart-column text-blue-600"></i> Arus Kas 6 Bulan Terakhir</h3>
-                <p class="text-xs text-gray-400">Pemasukan dan pengeluaran kas per bulan</p>
-            </div>
-            <span class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                <i class="fa-solid fa-calendar"></i> Bulanan
-            </span>
+<!-- Grafik Arus Kas (khusus bendahara) -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-chart-column text-blue-600"></i> Grafik &amp; Analisis Arus Kas Kelas</h3>
+            <p class="text-xs text-gray-400">Pemasukan dan pengeluaran kas per bulan</p>
         </div>
-        <div class="h-72">
-            <canvas id="bendaharaKasChart"></canvas>
-        </div>
+        <span class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+            <i class="fa-solid fa-calendar"></i> Bulanan
+        </span>
     </div>
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div class="mb-4">
-            <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-chart-pie text-blue-600"></i> Status Pembayaran</h3>
-            <p class="text-xs text-gray-400">Lunas vs belum lunas</p>
-        </div>
-        <div class="h-56">
-            <canvas id="bendaharaStatusChart"></canvas>
-        </div>
-        <div class="mt-4 grid grid-cols-2 gap-2 text-center">
-            <div class="bg-green-50 rounded-xl p-3">
-                <p class="text-xs text-green-600 font-medium">Lunas</p>
-                <p class="text-lg font-bold text-green-700">{{ number_format($totalLunas ?? 0, 0, ',', '.') }}</p>
-            </div>
-            <div class="bg-amber-50 rounded-xl p-3">
-                <p class="text-xs text-amber-600 font-medium">Belum Lunas</p>
-                <p class="text-lg font-bold text-amber-700">{{ number_format($belumLunas ?? 0, 0, ',', '.') }}</p>
-            </div>
-        </div>
-        <p class="text-[11px] text-gray-400 text-center mt-2">Dari {{ number_format($totalTagihan ?? 0, 0, ',', '.') }} tagihan</p>
+    <div class="h-72">
+        <canvas id="bendaharaKasChart"></canvas>
     </div>
 </div>
 @endsection
@@ -171,39 +148,7 @@
             });
         }
 
-        const statusCanvas = document.getElementById('bendaharaStatusChart');
-        if (statusCanvas) {
-            const lunas = @json($totalLunas ?? 0);
-            const belum = @json($belumLunas ?? 0);
-            const kosong = (lunas + belum) === 0;
 
-            new Chart(statusCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: kosong ? ['Belum ada tagihan'] : ['Lunas', 'Belum Lunas'],
-                    datasets: [{
-                        data: kosong ? [1] : [lunas, belum],
-                        backgroundColor: kosong ? ['#e5e7eb'] : ['#22c55e', '#f59e0b'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '68%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
-                        tooltip: {
-                            enabled: !kosong,
-                            callbacks: {
-                                label: (ctx) => ctx.label + ': ' + rupiah(ctx.parsed)
-                            }
-                        }
-                    }
-                }
-            });
-        }
     })();
 </script>
 @endpush
