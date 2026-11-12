@@ -345,25 +345,32 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
         $periodeAktif = optional(\App\Models\Iuran::orderBy('id_iuran', 'desc')->first())->periode ?? 'Minggu berjalan';
 
+        // Grafik arus kas 6 bulan terakhir (sama seperti dashboard admin)
         $chartLabels = [];
         $chartMasuk = [];
         $chartKeluar = [];
-        $iuranList = \App\Models\Iuran::orderBy('id_iuran')->get();
-        foreach ($iuranList as $i) {
-            $chartLabels[] = trim(($i->periode ?? '') . ' ' . ($i->minggu ?? ''));
-            $chartMasuk[] = (float) \App\Models\Pembayaran::where('id_iuran', $i->id_iuran)->sum('nominal_bayar');
-            $chartKeluar[] = 0;
+        for ($i = 5; $i >= 0; $i--) {
+            $bulan = now()->startOfMonth()->subMonths($i);
+            $chartLabels[] = $bulan->locale('id')->translatedFormat('M Y');
+            $chartMasuk[] = (float) \App\Models\Pembayaran::whereYear('tanggal_bayar', $bulan->year)
+                ->whereMonth('tanggal_bayar', $bulan->month)
+                ->sum('nominal_bayar');
+            $chartKeluar[] = (float) \App\Models\Pengeluaran::whereYear('tanggal', $bulan->year)
+                ->whereMonth('tanggal', $bulan->month)
+                ->sum('jumlah');
         }
-        if (empty($chartLabels)) {
-            $chartLabels = ['Pekan 1', 'Pekan 2', 'Pekan 3', 'Pekan 4', 'Pekan 5', 'Pekan 6'];
-            $chartMasuk = [0, 0, 0, 0, 0, 0];
-            $chartKeluar = [0, 0, 0, 0, 0, 0];
-        }
+
+        // Grafik status pembayaran (lunas vs belum lunas)
+        $totalIuran = \App\Models\Iuran::count();
+        $totalTagihan = $totalSiswa * $totalIuran;
+        $totalLunas = min(\App\Models\Pembayaran::where('status', 'lunas')->count(), $totalTagihan);
+        $belumLunas = max($totalTagihan - $totalLunas, 0);
 
         return view('bendahara.dashboard', compact(
             'kelas', 'totalSiswa', 'totalPemasukan', 'totalPengeluaran', 'saldo',
             'totalPembayaran', 'pembayaranTerbaru', 'periodeAktif',
-            'chartLabels', 'chartMasuk', 'chartKeluar'
+            'chartLabels', 'chartMasuk', 'chartKeluar',
+            'totalTagihan', 'totalLunas', 'belumLunas'
         ));
     })->name('bendahara.dashboard');
 
