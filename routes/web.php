@@ -636,48 +636,25 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
                 ->orderBy('tanggal_bayar', 'desc')->get();
         }
 
-        $totalSiswa = \App\Models\Siswa::count();
-        $totalIuran = \App\Models\Iuran::count();
         $rekapSiswa = [];
         $siswaList = \App\Models\Siswa::with('pembayaran')->orderBy('nama')->get();
         foreach ($siswaList as $s) {
             $lunasCount = $s->pembayaran->where('status', 'lunas')->count();
+            $totalTagihan = \App\Models\Iuran::count();
             $rekapSiswa[] = [
                 'nama' => $s->nama,
-                'lunas' => $lunasCount >= $totalIuran && $totalIuran > 0,
-                'keterangan' => $lunasCount >= $totalIuran && $totalIuran > 0
-                    ? 'Lunas ' . $lunasCount . '/' . $totalIuran
-                    : 'Belum bayar ' . $lunasCount . '/' . $totalIuran,
+                'lunas' => $lunasCount >= $totalTagihan && $totalTagihan > 0,
+                'keterangan' => $lunasCount >= $totalTagihan && $totalTagihan > 0
+                    ? 'Lunas ' . $lunasCount . '/' . $totalTagihan
+                    : 'Belum bayar ' . $lunasCount . '/' . $totalTagihan,
             ];
         }
-
-        // Grafik arus kas 6 bulan terakhir (sama seperti dashboard admin)
-        $chartLabels = [];
-        $chartMasuk = [];
-        $chartKeluar = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $bulan = now()->startOfMonth()->subMonths($i);
-            $chartLabels[] = $bulan->locale('id')->translatedFormat('M Y');
-            $chartMasuk[] = (float) \App\Models\Pembayaran::whereYear('tanggal_bayar', $bulan->year)
-                ->whereMonth('tanggal_bayar', $bulan->month)
-                ->sum('nominal_bayar');
-            $chartKeluar[] = (float) \App\Models\Pengeluaran::whereYear('tanggal', $bulan->year)
-                ->whereMonth('tanggal', $bulan->month)
-                ->sum('jumlah');
-        }
-
-        // Grafik status pembayaran (lunas vs belum lunas)
-        $totalTagihan = $totalSiswa * $totalIuran;
-        $totalLunas = min(\App\Models\Pembayaran::where('status', 'lunas')->count(), $totalTagihan);
-        $belumLunas = max($totalTagihan - $totalLunas, 0);
 
         $pengeluaran = \App\Models\Pengeluaran::orderBy('tanggal', 'desc')->limit(5)->get();
 
         return view('siswa.dashboard', compact(
             'siswaSaya', 'totalPemasukan', 'totalPengeluaran', 'iuranAktif',
-            'riwayatSaya', 'rekapSiswa', 'pengeluaran',
-            'chartLabels', 'chartMasuk', 'chartKeluar',
-            'totalTagihan', 'totalLunas', 'belumLunas'
+            'riwayatSaya', 'rekapSiswa', 'pengeluaran'
         ));
     })->name('siswa.dashboard');
 
