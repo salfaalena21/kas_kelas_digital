@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('title', 'Data Pembayaran Kas')
-
 @section('content')
 <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-slate-900 p-6 sm:p-8 rounded-2xl text-white shadow-sm flex items-center justify-between relative overflow-hidden mb-6">
     <div class="relative z-10">
