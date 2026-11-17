@@ -1,30 +1,27 @@
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Pembayaran;
-use App\Models\Pengeluaran;
-use Illuminate\Support\Facades\DB; // <---Tambahkan baris ini di atas
-
-class BendaharaController extends Controller
-{
-    public function index()
+public function store(Request $request)
     {
-        $totalPemasukan = Pembayaran::sum('nominal_bayar');
-        $totalPengeluaran = Pengeluaran::sum('jumlah');
-        $saldo = $totalPemasukan - $totalPengeluaran;
-    //kueri rekap agregat
-        $rekapKas = Pembayaran::select(
-            'id_iuran', // Sesuaikan kolom pengelompokan (bisa id_iuran / kategori)
-            DB::raw('COUNT(*) as total_data'),
-            DB::raw('SUM(nominal_bayar) as total_nominal')
-        )
-        ->groupBy('id_iuran')
-        ->get();
-        // ----------------------------------------
+        // 1. Validasi SKKNI 3: Cek apakah siswa sudah pernah membayar iuran yang sama
+        $sudahBayar = Pembayaran::where('id_siswa', $request->id_siswa)
+                               ->where('id_iuran', $request->id_iuran)
+                               ->exists();
 
-        // Masukkan $rekapKas ke dalam compact view
-        return view('bendahara.dashboard', compact('totalPemasukan', 'totalPengeluaran', 'saldo', 'rekapKas'));
+        if ($sudahBayar) {
+            // Jika sudah ada, kembalikan ke form dengan pesan error (ditangkap SKKNI 5)
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Peringatan: Siswa ini sudah tercatat membayar untuk iuran/periode tersebut!');
+        }
+
+        // 2. Jika belum ada, simpan data pembayaran baru ke database
+        Pembayaran::create([
+            'id_siswa' => $request->id_siswa,
+            'id_iuran' => $request->id_iuran,
+            'nominal_bayar' => $request->nominal_bayar,
+            'kembalian' => $request->kembalian,
+            'tanggal_bayar' => $request->tanggal_bayar,
+            'metode' => $request->metode,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('bendahara.pembayaran')->with('success', 'Pembayaran berhasil dicatat.');
     }
-}

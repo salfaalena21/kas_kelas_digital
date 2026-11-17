@@ -274,7 +274,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             $nis = trim((string) $request->nis);
             $siswa = \App\Models\Siswa::where('nis', $nis)->first();
             if ($siswa && (!$siswa->id_user || (int) $siswa->id_user === (int) $user->id_user)) {
-                // Lepas kaitan siswa lain dari user ini jika berbeda
                 \App\Models\Siswa::where('id_user', $user->id_user)
                     ->where('id_siswa', '!=', $siswa->id_siswa)
                     ->update(['id_user' => null]);
@@ -504,6 +503,7 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
         return view('pembayaran.index', compact('pembayaran', 'siswa', 'iuran'));
     })->name('bendahara.pembayaran');
 
+    // --- VALIDASI ANTI-DUPLIKAT (SKKNI 3) DITAMBAHKAN DI SINI ---
     Route::post('/pembayaran', function (Illuminate\Http\Request $request) {
         $request->validate([
             'id_siswa' => 'required|exists:siswa,id_siswa',
@@ -512,6 +512,18 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
             'nominal_bayar' => 'required|numeric',
             'status' => 'required',
         ]);
+
+        // Cek apakah siswa sudah pernah membayar iuran yang sama sebelumnya
+        $sudahBayar = \App\Models\Pembayaran::where('id_siswa', $request->id_siswa)
+                                           ->where('id_iuran', $request->id_iuran)
+                                           ->exists();
+
+        if ($sudahBayar) {
+            return back()
+                ->withInput()
+                ->with('error', 'Peringatan: Siswa ini sudah tercatat membayar untuk iuran/periode tersebut!');
+        }
+
         \App\Models\Pembayaran::create([
             'id_siswa' => $request->id_siswa,
             'id_iuran' => $request->id_iuran,
@@ -524,6 +536,7 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
         ]);
         return back()->with('success', 'Pembayaran berhasil dicatat.');
     })->name('bendahara.pembayaran.store');
+    // -------------------------------------------------------------
 
     Route::put('/pembayaran/{pembayaran}', function (Illuminate\Http\Request $request, \App\Models\Pembayaran $pembayaran) {
         $request->validate([
@@ -547,7 +560,7 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
     Route::delete('/pembayaran/{pembayaran}', function (\App\Models\Pembayaran $pembayaran) {
         $pembayaran->delete();
-        return back()->with('success', 'Pembayaran berhasil dihapus.');
+        return back()->with('success', 'Data pembayaran berhasil dihapus.');
     })->name('bendahara.pembayaran.destroy');
 
     // Pengeluaran
@@ -705,7 +718,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
 
         $iuran = \App\Models\Iuran::findOrFail($request->id_iuran);
 
-        // Cari pembayaran untuk (siswa, iuran) yang dipilih; jika belum ada, buat otomatis (pending)
         $pembayaran = \App\Models\Pembayaran::where('id_siswa', $siswaSaya->id_siswa)
             ->where('id_iuran', $iuran->id_iuran)
             ->orderBy('id_pembayaran', 'desc')
@@ -732,7 +744,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->group(function () {
         $data = @file_get_contents($file->getRealPath());
         $fileData = $data !== false ? ('data:' . $mime . ';base64,' . base64_encode($data)) : null;
 
-        // simpan ke disk (best-effort) - pastikan folder ada
         $relPath = 'bukti/' . $file->hashName();
         $storedPath = $relPath;
         try {
