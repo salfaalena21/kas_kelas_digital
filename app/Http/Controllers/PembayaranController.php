@@ -25,7 +25,28 @@ class PembayaranController extends Controller
             'status' => 'nullable|string',
             'id_user' => 'nullable|exists:users,id_user',
         ]);
-
+        //(Validasi Anti-Duplikat) 
+        $existing = Pembayaran::where('id_siswa', $request->id_siswa)
+                              ->where('id_iuran', $request->id_iuran)
+                              ->where('tanggal_bayar', $request->tanggal_bayar)
+                              ->first();
+        if ($existing) {
+            // Jika data sudah ada, tolak dan kembalikan pesan error ke UI 
+            return redirect()->back()->with('error', 'Data gagal disimpan! siswa tersebut sudah melakukan pembayaran untuk jenis iuran ini pada tanggal yang sama,');
+        }
+            // Jika tidak duplikat, simpan data baru ke database
+            pembayaran::create([
+                'id_siswa' => $request->id_siswa,
+                'id_iuran' => $request->id_iuran,
+                'nominal_bayar' => $request->nominal_bayar,
+                'tanggal_bayar' => $request->tanggal_bayar,
+                'metode' => $request->metode,
+                'status' => $request->status,
+                'id_user' => $request->id_user,
+            ]);
+    return redirect()->route('bendahara.dashboard')->with('success','Data pembayaran kas berhasil ditambahkan.');
+    
+            
         $iuran = \App\Models\Iuran::findOrFail($validated['id_iuran']);
         $validated['kembalian'] = max(0, $validated['nominal_bayar'] - $iuran->nominal);
         $validated['status'] = $validated['status'] ?? 'lunas';
