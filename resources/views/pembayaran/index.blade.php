@@ -17,6 +17,19 @@
         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
             <i class="fa-solid fa-plus-circle text-blue-600"></i> Tambah Pembayaran
         </h2>
+
+        <!-- --->
+        <!-- ALERT ERROR VALIDASI DUPLIKAT (SKKNI 5) DITAMBAHKAN DI SINI -->
+        <!-- --->
+        @if(session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-xl shadow-sm text-sm" role="alert">
+                <p class="font-bold flex items-center gap-1.5 mb-0.5">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Peringatan Validasi
+                </p>
+                <p>{{ session('error') }}</p>
+            </div>
+        @endif
+
         <form action="{{ route('bendahara.pembayaran.store') }}" method="POST" class="space-y-4">
             @csrf
             <div class="relative">

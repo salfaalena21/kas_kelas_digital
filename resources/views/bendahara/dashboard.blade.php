@@ -44,6 +44,30 @@
     </div>
 </div>
 
+<!-- Kartu Statistik Rekap Agregat per Kategori/Iuran (SKKNI 5) -->
+<div class="mb-8">
+    <h3 class="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-layer-group text-blue-600"></i> Rekapitulasi Pembayaran per Kategori
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @isset($rekapKas)
+            @forelse($rekapKas as $item)
+                <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                    <p class="text-xs text-gray-400 font-medium uppercase">ID Iuran / Kategori: {{ $item->id_iuran }}</p>
+                    <h4 class="text-xl font-bold text-gray-800 mt-1">Rp {{ number_format($item->total_nominal, 0, ',', '.') }}</h4>
+                    <span class="text-xs text-blue-600 font-semibold mt-2 block bg-blue-50 px-2.5 py-1 rounded-md w-max">
+                        {{ $item->total_data }} Transaksi Tercatat
+                    </span>
+                </div>
+            @empty
+                <div class="col-span-3 bg-white p-4 rounded-xl text-center text-gray-400 text-sm border border-gray-100">
+                    Belum ada data rekapitulasi iuran.
+                </div>
+            @endforelse
+        @endisset
+    </div>
+</div>
+
 <!-- Pembayaran Terbaru -->
 <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
     <div class="flex items-center justify-between mb-4">
@@ -147,8 +171,6 @@
                 }
             });
         }
-
-
     })();
 </script>
 @endpush
