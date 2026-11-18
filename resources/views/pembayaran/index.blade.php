@@ -120,6 +120,7 @@
                         <th class="p-3 bg-gray-50">Bayar</th>
                         <th class="p-3 bg-gray-50">Kembalian</th>
                         <th class="p-3 bg-gray-50">Tanggal</th>
+                        <th class="p-3 bg-gray-50">Metode</th>
                         <th class="p-3 bg-gray-50">Status</th>
                         <th class="p-3 bg-gray-50">Aksi</th>
                     </tr>
@@ -133,6 +134,15 @@
                             <td class="p-3 text-green-600 font-semibold">Rp {{ number_format($item->nominal_bayar, 0, ',', '.') }}</td>
                             <td class="p-3">Rp {{ number_format($item->kembalian, 0, ',', '.') }}</td>
                             <td class="p-3">{{ \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') }}</td>
+                            <td class="p-3">
+                                @if(($item->metode ?? '') === 'tunai')
+                                    <span class="bg-sky-100 text-sky-700 text-xs px-2.5 py-1 rounded-full font-semibold">Tunai</span>
+                                @elseif(($item->metode ?? '') === 'transfer')
+                                    <span class="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-semibold">Transfer</span>
+                                @else
+                                    <span class="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full font-semibold">{{ $item->metode ? ucfirst($item->metode) : '-' }}</span>
+                                @endif
+                            </td>
                             <td class="p-3">
                                 @if($item->status === 'lunas')
                                     <span class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">Lunas</span>
@@ -168,9 +178,9 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="p-4 text-center text-gray-400">Belum ada data pembayaran.</td></tr>
+                        <tr><td colspan="9" class="p-4 text-center text-gray-400">Belum ada data pembayaran.</td></tr>
                     @endforelse
-                    <tr id="pembayaranNoResult" class="hidden"><td colspan="8" class="p-4 text-center text-gray-400">Tidak ada data yang cocok dengan pencarian.</td></tr>
+                    <tr id="pembayaranNoResult" class="hidden"><td colspan="9" class="p-4 text-center text-gray-400">Tidak ada data yang cocok dengan pencarian.</td></tr>
                 </tbody>
             </table>
         </div>
