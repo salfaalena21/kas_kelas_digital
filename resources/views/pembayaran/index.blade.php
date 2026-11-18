@@ -101,9 +101,13 @@
                 <p class="text-xs text-gray-500 mt-1">Total: <span id="pembayaranCountTotal">{{ $pembayaran->count() }}</span> data</p>
             </div>
             <div class="relative w-full sm:w-80">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </span>
                 <input type="text" id="pembayaranSearch" placeholder="Cari siswa, NIS, periode/minggu, tanggal, status..." 
-                       class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
             </div>
         </div>
         <div class="overflow-auto max-h-[560px] border border-gray-100 rounded-xl">
