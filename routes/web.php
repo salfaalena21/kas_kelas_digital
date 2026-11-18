@@ -82,9 +82,7 @@ Route::get('/__diag/{token}', function (string $token) {
         $pembLunas6 = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6->pluck('id_iuran'))->where('status','lunas')->count();
         $pembDistinctSiswa6 = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6->pluck('id_iuran'))->distinct('id_siswa')->count('id_siswa');
         $sampleIuran = \App\Models\Iuran::orderBy('tanggal_jatuh_tempo')->orderBy('id_iuran')->get(['id_iuran','periode','minggu','nominal','tanggal_jatuh_tempo']);
-        $samplePemb = \App\Models\Pembayaran::with(['siswa','iuran'])->orderBy('id_pembayaran','desc')->limit(10)->get()->map(fn($p)=>[
-            'id'=>$p->id_pembayaran,'siswa'=>$p->siswa->nama ?? null,'periode'=>$p->iuran->periode ?? null,'minggu'=>$p->iuran->minggu ?? null,'status'=>$p->status,'metode'=>$p->metode ?? null,'nominal'=>$p->nominal_bayar
-        ]);
+        $allPemb = \App\Models\Pembayaran::orderBy('id_pembayaran')->get(['id_pembayaran','id_siswa','id_iuran','id_user','nominal_bayar','kembalian','tanggal_bayar','metode','status','created_at','updated_at']);
         $pengeluaranCount = \App\Models\Pengeluaran::count();
         $pengeluaranSum = (float) \App\Models\Pengeluaran::sum('jumlah');
         $pengeluaranAll = \App\Models\Pengeluaran::orderBy('id')->get(['id','jumlah','tanggal','keterangan','created_at','updated_at']);
@@ -99,7 +97,7 @@ Route::get('/__diag/{token}', function (string $token) {
             'pembayaran_lunas_6bulan'=>$pembLunas6,
             'distinct_siswa_paid_6bulan'=>$pembDistinctSiswa6,
             'sample_iuran'=>$sampleIuran,
-            'sample_pembayaran_latest'=>$samplePemb,
+            'pembayaran_all'=>$allPemb,
             'pengeluaran_count'=>$pengeluaranCount,
             'pengeluaran_sum'=>$pengeluaranSum,
             'saldo'=>$saldo,
