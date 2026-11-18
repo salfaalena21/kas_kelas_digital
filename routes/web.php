@@ -57,6 +57,17 @@ Route::get('/__seed-lunas/{token}', function (string $token) {
     }
 });
 
+// One-shot helper: ubah metode transfer -> tunai
+Route::get('/__metode-tunai/{token}', function (string $token) {
+    if ($token !== 'smartkas-setup-2026') abort(404);
+    try {
+        $updated = \App\Models\Pembayaran::where('metode', 'transfer')->update(['metode' => 'tunai']);
+        return '<pre>OK metode tunai: ' . $updated . ' pembayaran diperbarui</pre>';
+    } catch (\Throwable $e) {
+        return '<pre>ERR ' . e($e->getMessage()) . '</pre>';
+    }
+});
+
 // Diagnostik data (sementara)
 Route::get('/__diag/{token}', function (string $token) {
     if ($token !== 'smartkas-setup-2026') abort(404);
