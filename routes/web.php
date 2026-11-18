@@ -398,25 +398,25 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             ];
         });
 
-        // Laporan kas per siswa (6 bulan iuran: Juni - November 2026)
-        $periode6Bulan = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
-        $iuran6BulanIds = \App\Models\Iuran::whereIn('periode', $periode6Bulan)->pluck('id_iuran');
-        $totalIuran6Bulan = $iuran6BulanIds->count();
-        $lunasMap = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6BulanIds)
+        // Laporan kas per siswa (berdasarkan total semua iuran/tagihan)
+        $iuranAllIds = \App\Models\Iuran::pluck('id_iuran');
+        $totalIuranAll = $iuranAllIds->count();
+        $lunasMap = \App\Models\Pembayaran::whereIn('id_iuran', $iuranAllIds)
             ->where('status', 'lunas')
             ->selectRaw('id_siswa, COUNT(DISTINCT id_iuran) as lunas_count')
             ->groupBy('id_siswa')
             ->pluck('lunas_count', 'id_siswa');
-        $rekapPerSiswa = \App\Models\Siswa::with('kelas')->orderBy('nama')->get()->map(function ($s) use ($lunasMap, $totalIuran6Bulan) {
+        $rekapPerSiswa = \App\Models\Siswa::with('kelas')->orderBy('nama')->get()->map(function ($s) use ($lunasMap, $totalIuranAll) {
             $lunas = (int) ($lunasMap[$s->id_siswa] ?? 0);
             return [
                 'nama' => $s->nama,
                 'kelas' => $s->kelas->nama_kelas ?? '-',
                 'lunas' => $lunas,
-                'belum' => max($totalIuran6Bulan - $lunas, 0),
+                'belum' => max($totalIuranAll - $lunas, 0),
             ];
         });
-        $periodeLabel = 'Juni - November 2026 (6 bulan)';
+        $totalIuran6Bulan = $totalIuranAll; // kompatibilitas view
+        $periodeLabel = 'Total semua iuran (Juni - Desember 2026)';
 
         return view('admin.laporan.index', compact('pemasukan', 'pengeluaran', 'saldo', 'pengeluaranList', 'rekapPemasukanSiswa', 'rekapPerSiswa', 'totalIuran6Bulan', 'periodeLabel'));
     })->name('admin.laporan.index');
@@ -926,10 +926,10 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
         $rekapPerSiswa = collect();
         $rekapPemasukanSiswa = collect();
         $totalIuran6Bulan = 0;
-        $periodeLabel = 'Juni - November 2026 (6 bulan)';
-        $periode6Bulan = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
-        $iuran6BulanIds = \App\Models\Iuran::whereIn('periode', $periode6Bulan)->pluck('id_iuran');
-        $totalIuran6Bulan = $iuran6BulanIds->count();
+        $periodeLabel = 'Total semua iuran (Juni - Desember 2026)';
+
+        $iuranAllIds = \App\Models\Iuran::pluck('id_iuran');
+        $totalIuran6Bulan = $iuranAllIds->count();
 
         if ($kelas) {
             $siswaIds = \App\Models\Siswa::where('id_kelas', $kelas->id_kelas)->pluck('id_siswa');
@@ -942,7 +942,7 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
                 ->keyBy('id_siswa');
 
             $lunasMap = \App\Models\Pembayaran::whereIn('id_siswa', $siswaIds)
-                ->whereIn('id_iuran', $iuran6BulanIds)
+                ->whereIn('id_iuran', $iuranAllIds)
                 ->where('status', 'lunas')
                 ->selectRaw('id_siswa, COUNT(DISTINCT id_iuran) as lunas_count')
                 ->groupBy('id_siswa')
