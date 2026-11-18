@@ -9,14 +9,14 @@ class IuranSeeder extends Seeder
 {
     public function run(): void
     {
-        // 6 bulan iuran mulai dari Juli 2026 (Juli - Desember 2026), 4 minggu per bulan
+        // 6 bulan iuran (Juni - November 2026), 4 minggu per bulan
         $bulan = [
+            ['periode' => 'Juni 2026', 'year' => 2026, 'month' => 6],
             ['periode' => 'Juli 2026', 'year' => 2026, 'month' => 7],
             ['periode' => 'Agustus 2026', 'year' => 2026, 'month' => 8],
             ['periode' => 'September 2026', 'year' => 2026, 'month' => 9],
             ['periode' => 'Oktober 2026', 'year' => 2026, 'month' => 10],
             ['periode' => 'November 2026', 'year' => 2026, 'month' => 11],
-            ['periode' => 'Desember 2026', 'year' => 2026, 'month' => 12],
         ];
 
         $data = [];

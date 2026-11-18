@@ -43,7 +43,7 @@ Route::get('/__fixpass/{token}', function (string $token) {
     }
 });
 
-// One-shot helper: seed iuran 6 bulan (Juli-Desember 2026) & lunasi semua siswa
+// One-shot helper: seed iuran 6 bulan (Juni-November 2026) & lunasi semua siswa
 Route::get('/__seed-lunas/{token}', function (string $token) {
     if ($token !== 'smartkas-setup-2026') abort(404);
     try {
@@ -72,7 +72,7 @@ Route::get('/__metode-tunai/{token}', function (string $token) {
 Route::get('/__diag/{token}', function (string $token) {
     if ($token !== 'smartkas-setup-2026') abort(404);
     try {
-        $periode6 = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
+        $periode6 = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
         $siswaCount = \App\Models\Siswa::count();
         $iuranTotal = \App\Models\Iuran::count();
         $iuran6 = \App\Models\Iuran::whereIn('periode', $periode6)->get(['id_iuran','periode','minggu','nominal']);
@@ -398,8 +398,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
             ];
         });
 
-        // Laporan kas per siswa (6 bulan iuran: Juli - Desember 2026)
-        $periode6Bulan = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
+        // Laporan kas per siswa (6 bulan iuran: Juni - November 2026)
+        $periode6Bulan = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
         $iuran6BulanIds = \App\Models\Iuran::whereIn('periode', $periode6Bulan)->pluck('id_iuran');
         $totalIuran6Bulan = $iuran6BulanIds->count();
         $lunasMap = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6BulanIds)
@@ -416,7 +416,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
                 'belum' => max($totalIuran6Bulan - $lunas, 0),
             ];
         });
-        $periodeLabel = 'Juli - Desember 2026 (6 bulan)';
+        $periodeLabel = 'Juni - November 2026 (6 bulan)';
 
         return view('admin.laporan.index', compact('pemasukan', 'pengeluaran', 'saldo', 'pengeluaranList', 'rekapPemasukanSiswa', 'rekapPerSiswa', 'totalIuran6Bulan', 'periodeLabel'));
     })->name('admin.laporan.index');
@@ -926,8 +926,8 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
         $rekapPerSiswa = collect();
         $rekapPemasukanSiswa = collect();
         $totalIuran6Bulan = 0;
-        $periodeLabel = 'Juli - Desember 2026 (6 bulan)';
-        $periode6Bulan = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
+        $periodeLabel = 'Juni - November 2026 (6 bulan)';
+        $periode6Bulan = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
         $iuran6BulanIds = \App\Models\Iuran::whereIn('periode', $periode6Bulan)->pluck('id_iuran');
         $totalIuran6Bulan = $iuran6BulanIds->count();
 

@@ -12,10 +12,10 @@ class LunasinIuranSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pastikan iuran 6 bulan (Juli - Desember 2026) ada
+        // Pastikan iuran 6 bulan (Juni - November 2026) ada
         $this->call(IuranSeeder::class);
 
-        $periode6Bulan = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
+        $periode6Bulan = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
         $iuranList = Iuran::whereIn('periode', $periode6Bulan)->get();
         $siswaList = Siswa::all();
         $petugas = User::where('username', 'bendahara1')->first() ?? User::where('role', 'bendahara')->first();
