@@ -57,6 +57,38 @@ Route::get('/__seed-lunas/{token}', function (string $token) {
     }
 });
 
+// Diagnostik data (sementara)
+Route::get('/__diag/{token}', function (string $token) {
+    if ($token !== 'smartkas-setup-2026') abort(404);
+    try {
+        $periode6 = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
+        $siswaCount = \App\Models\Siswa::count();
+        $iuranTotal = \App\Models\Iuran::count();
+        $iuran6 = \App\Models\Iuran::whereIn('periode', $periode6)->get(['id_iuran','periode','minggu','nominal']);
+        $iuranByPeriode = \App\Models\Iuran::selectRaw('periode, COUNT(*) as c')->groupBy('periode')->orderBy('periode')->get();
+        $pembTotal = \App\Models\Pembayaran::count();
+        $pembLunas6 = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6->pluck('id_iuran'))->where('status','lunas')->count();
+        $pembDistinctSiswa6 = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6->pluck('id_iuran'))->distinct('id_siswa')->count('id_siswa');
+        $sampleIuran = \App\Models\Iuran::orderBy('id_iuran')->get(['id_iuran','periode','minggu','nominal']);
+        $samplePemb = \App\Models\Pembayaran::with(['siswa','iuran'])->orderBy('id_pembayaran','desc')->limit(10)->get()->map(fn($p)=>[
+            'id'=>$p->id_pembayaran,'siswa'=>$p->siswa->nama ?? null,'periode'=>$p->iuran->periode ?? null,'minggu'=>$p->iuran->minggu ?? null,'status'=>$p->status
+        ]);
+        return response()->json([
+            'siswa_count'=>$siswaCount,
+            'iuran_total'=>$iuranTotal,
+            'iuran_6bulan_count'=>$iuran6->count(),
+            'iuran_by_periode'=>$iuranByPeriode,
+            'pembayaran_total'=>$pembTotal,
+            'pembayaran_lunas_6bulan'=>$pembLunas6,
+            'distinct_siswa_paid_6bulan'=>$pembDistinctSiswa6,
+            'sample_iuran'=>$sampleIuran,
+            'sample_pembayaran_latest'=>$samplePemb,
+        ]);
+    } catch (\Throwable $e) {
+        return '<pre>ERR ' . e($e->getMessage()) . '</pre>';
+    }
+});
+
 // Sajikan bukti langsung dari DB berdasarkan ID (paling andal)
 Route::get('/bukti-img/{id}', function ($id) {
     try {
