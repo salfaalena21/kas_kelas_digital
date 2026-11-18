@@ -36,6 +36,51 @@
     </div>
 </div>
 
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto mb-6">
+    <div class="px-4 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+            <h2 class="font-semibold text-gray-800">Laporan Kas per Siswa</h2>
+            <p class="text-xs text-gray-500 mt-1">Rekap otomatis iuran <span class="font-medium text-gray-700">{{ $periodeLabel ?? '6 bulan' }}</span> (total {{ $totalIuran6Bulan ?? 0 }} iuran/tagihan aktif). Menampilkan jumlah iuran sudah dibayar (lunas) dan belum dibayar (nunggak) per siswa.</p>
+        </div>
+        <span class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium w-fit">{{ isset($rekapPerSiswa) ? $rekapPerSiswa->count() : 0 }} siswa</span>
+    </div>
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="text-left px-4 py-2 font-medium text-gray-600">No</th>
+                <th class="text-left px-4 py-2 font-medium text-gray-600">Nama Siswa</th>
+                <th class="text-left px-4 py-2 font-medium text-gray-600">Kelas</th>
+                <th class="text-center px-4 py-2 font-medium text-gray-600">Lunas</th>
+                <th class="text-center px-4 py-2 font-medium text-gray-600">Belum Bayar (Nunggak)</th>
+                <th class="text-left px-4 py-2 font-medium text-gray-600">Keterangan</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            @forelse(($rekapPerSiswa ?? []) as $i => $r)
+            @php $tuntas = ($r['belum'] ?? 0) == 0 && ($totalIuran6Bulan ?? 0) > 0; @endphp
+            <tr>
+                <td class="px-4 py-2 text-gray-600">{{ $i + 1 }}</td>
+                <td class="px-4 py-2 text-gray-800 font-medium">{{ $r['nama'] ?? '-' }}</td>
+                <td class="px-4 py-2 text-gray-600">{{ $r['kelas'] ?? '-' }}</td>
+                <td class="px-4 py-2 text-center"><span class="text-green-700 font-semibold">{{ $r['lunas'] ?? 0 }}</span> <span class="text-gray-400">/ {{ $totalIuran6Bulan ?? 0 }}</span></td>
+                <td class="px-4 py-2 text-center"><span class="{{ ($r['belum'] ?? 0) > 0 ? 'text-red-600' : 'text-green-700' }} font-semibold">{{ $r['belum'] ?? 0 }}</span></td>
+                <td class="px-4 py-2">
+                    @if(($totalIuran6Bulan ?? 0) == 0)
+                        <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">Belum ada data iuran</span>
+                    @elseif($tuntas)
+                        <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">Lunas semua</span>
+                    @else
+                        <span class="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Masih nunggak</span>
+                    @endif
+                </td>
+            </tr>
+            @empty
+            <tr><td colspan="6" class="px-4 py-6 text-center text-gray-400">Data siswa belum tersedia.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
         <div class="px-4 py-3 border-b border-gray-100">
