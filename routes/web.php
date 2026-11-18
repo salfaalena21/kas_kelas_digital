@@ -74,6 +74,7 @@ Route::get('/__diag/{token}', function (string $token) {
     try {
         $periode6 = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
         $siswaCount = \App\Models\Siswa::count();
+        $siswaAll = \App\Models\Siswa::orderBy('id_siswa')->get(['id_siswa','id_user','id_kelas','nis','nama']);
         $iuranTotal = \App\Models\Iuran::count();
         $iuran6 = \App\Models\Iuran::whereIn('periode', $periode6)->get(['id_iuran','periode','minggu','nominal','tanggal_jatuh_tempo']);
         $iuranByPeriode = \App\Models\Iuran::selectRaw('periode, COUNT(*) as c')->groupBy('periode')->orderBy('periode')->get();
@@ -89,6 +90,7 @@ Route::get('/__diag/{token}', function (string $token) {
         $saldo = $pembSum - $pengeluaranSum;
         return response()->json([
             'siswa_count'=>$siswaCount,
+            'siswa_all'=>$siswaAll,
             'iuran_total'=>$iuranTotal,
             'iuran_6bulan_count'=>$iuran6->count(),
             'iuran_by_periode'=>$iuranByPeriode,
