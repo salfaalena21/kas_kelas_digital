@@ -381,8 +381,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         $pemasukan = \App\Models\Pembayaran::sum('nominal_bayar');
         $pengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $saldo = $pemasukan - $pengeluaran;
-        $pembayaran = \App\Models\Pembayaran::with(['siswa', 'iuran'])->orderBy('tanggal_bayar', 'desc')->limit(50)->get();
         $pengeluaranList = \App\Models\Pengeluaran::orderBy('tanggal', 'desc')->limit(50)->get();
+
+        // Rekap pemasukan per siswa (rapi, tanpa scroll panjang per transaksi)
+        $bayarMap = \App\Models\Pembayaran::selectRaw('id_siswa, COUNT(*) as jml_bayar, SUM(nominal_bayar) as total_bayar')
+            ->groupBy('id_siswa')
+            ->get()
+            ->keyBy('id_siswa');
+        $rekapPemasukanSiswa = \App\Models\Siswa::with('kelas')->orderBy('nama')->get()->map(function ($s) use ($bayarMap) {
+            $b = $bayarMap[$s->id_siswa] ?? null;
+            return [
+                'nama' => $s->nama,
+                'kelas' => $s->kelas->nama_kelas ?? '-',
+                'jml_bayar' => (int) ($b->jml_bayar ?? 0),
+                'total_bayar' => (float) ($b->total_bayar ?? 0),
+            ];
+        });
 
         // Laporan kas per siswa (6 bulan iuran: Juli - Desember 2026)
         $periode6Bulan = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
@@ -404,7 +418,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         });
         $periodeLabel = 'Juli - Desember 2026 (6 bulan)';
 
-        return view('admin.laporan.index', compact('pemasukan', 'pengeluaran', 'saldo', 'pembayaran', 'pengeluaranList', 'rekapPerSiswa', 'totalIuran6Bulan', 'periodeLabel'));
+        return view('admin.laporan.index', compact('pemasukan', 'pengeluaran', 'saldo', 'pengeluaranList', 'rekapPemasukanSiswa', 'rekapPerSiswa', 'totalIuran6Bulan', 'periodeLabel'));
     })->name('admin.laporan.index');
 });
 
@@ -908,9 +922,9 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
         $user = \Illuminate\Support\Facades\Auth::user();
         $kelas = \App\Models\Kelas::where('wali_kelas', $user->nama)->first();
 
-        $pembayaran = collect();
         $totalPemasukan = 0;
         $rekapPerSiswa = collect();
+        $rekapPemasukanSiswa = collect();
         $totalIuran6Bulan = 0;
         $periodeLabel = 'Juli - Desember 2026 (6 bulan)';
         $periode6Bulan = ['Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026','Desember 2026'];
@@ -919,10 +933,13 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
 
         if ($kelas) {
             $siswaIds = \App\Models\Siswa::where('id_kelas', $kelas->id_kelas)->pluck('id_siswa');
-            $pembayaran = \App\Models\Pembayaran::with(['siswa', 'iuran'])
-                ->whereIn('id_siswa', $siswaIds)
-                ->orderBy('tanggal_bayar', 'desc')->get();
-            $totalPemasukan = (float) $pembayaran->sum('nominal_bayar');
+            $totalPemasukan = (float) \App\Models\Pembayaran::whereIn('id_siswa', $siswaIds)->sum('nominal_bayar');
+
+            $bayarMap = \App\Models\Pembayaran::whereIn('id_siswa', $siswaIds)
+                ->selectRaw('id_siswa, COUNT(*) as jml_bayar, SUM(nominal_bayar) as total_bayar')
+                ->groupBy('id_siswa')
+                ->get()
+                ->keyBy('id_siswa');
 
             $lunasMap = \App\Models\Pembayaran::whereIn('id_siswa', $siswaIds)
                 ->whereIn('id_iuran', $iuran6BulanIds)
@@ -930,6 +947,16 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
                 ->selectRaw('id_siswa, COUNT(DISTINCT id_iuran) as lunas_count')
                 ->groupBy('id_siswa')
                 ->pluck('lunas_count', 'id_siswa');
+
+            $rekapPemasukanSiswa = \App\Models\Siswa::where('id_kelas', $kelas->id_kelas)->orderBy('nama')->get()->map(function ($s) use ($bayarMap) {
+                $b = $bayarMap[$s->id_siswa] ?? null;
+                return [
+                    'nama' => $s->nama,
+                    'jml_bayar' => (int) ($b->jml_bayar ?? 0),
+                    'total_bayar' => (float) ($b->total_bayar ?? 0),
+                ];
+            });
+
             $rekapPerSiswa = \App\Models\Siswa::where('id_kelas', $kelas->id_kelas)->orderBy('nama')->get()->map(function ($s) use ($lunasMap, $totalIuran6Bulan) {
                 $lunas = (int) ($lunasMap[$s->id_siswa] ?? 0);
                 return [
@@ -945,8 +972,8 @@ Route::middleware(['auth', 'role:wali_kelas'])->prefix('walikelas')->group(funct
         $saldo = $totalPemasukan - $totalPengeluaran;
 
         return view('walikelas.laporan', compact(
-            'kelas', 'pembayaran', 'pengeluaran', 'totalPemasukan', 'totalPengeluaran', 'saldo',
-            'rekapPerSiswa', 'totalIuran6Bulan', 'periodeLabel'
+            'kelas', 'pengeluaran', 'totalPemasukan', 'totalPengeluaran', 'saldo',
+            'rekapPemasukanSiswa', 'rekapPerSiswa', 'totalIuran6Bulan', 'periodeLabel'
         ));
     })->name('walikelas.laporan');
 });

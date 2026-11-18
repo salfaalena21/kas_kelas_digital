@@ -84,26 +84,31 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
         <div class="px-4 py-3 border-b border-gray-100">
-            <h2 class="font-semibold text-gray-800">Pemasukan Terakhir</h2>
+            <h2 class="font-semibold text-gray-800">Rekap Pemasukan per Siswa</h2>
+            <p class="text-xs text-gray-500 mt-1">Ringkasan per nama siswa (rapi, tanpa daftar transaksi panjang).</p>
         </div>
         <table class="w-full text-sm">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="text-left px-4 py-2 font-medium text-gray-600">Tanggal</th>
-                    <th class="text-left px-4 py-2 font-medium text-gray-600">Siswa</th>
-                    <th class="text-left px-4 py-2 font-medium text-gray-600">Iuran</th>
-                    <th class="text-right px-4 py-2 font-medium text-gray-600">Nominal</th>
+                    <th class="text-left px-4 py-2 font-medium text-gray-600">No</th>
+                    <th class="text-left px-4 py-2 font-medium text-gray-600">Nama Siswa</th>
+                    <th class="text-left px-4 py-2 font-medium text-gray-600">Kelas</th>
+                    <th class="text-center px-4 py-2 font-medium text-gray-600">Jml Bayar</th>
+                    <th class="text-right px-4 py-2 font-medium text-gray-600">Total Bayar</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                @foreach($pembayaran as $pb)
+                @forelse(($rekapPemasukanSiswa ?? []) as $i => $r)
                 <tr>
-                    <td class="px-4 py-2 text-gray-600">{{ $pb->tanggal_bayar }}</td>
-                    <td class="px-4 py-2 text-gray-800">{{ $pb->siswa->nama ?? '-' }}</td>
-                    <td class="px-4 py-2 text-gray-600">{{ $pb->iuran->periode ?? '-' }}</td>
-                    <td class="px-4 py-2 text-right text-green-600">Rp {{ number_format($pb->nominal_bayar, 0, ',', '.') }}</td>
+                    <td class="px-4 py-2 text-gray-600">{{ $i + 1 }}</td>
+                    <td class="px-4 py-2 text-gray-800 font-medium">{{ $r['nama'] ?? '-' }}</td>
+                    <td class="px-4 py-2 text-gray-600">{{ $r['kelas'] ?? '-' }}</td>
+                    <td class="px-4 py-2 text-center text-gray-700">{{ $r['jml_bayar'] ?? 0 }}x</td>
+                    <td class="px-4 py-2 text-right text-green-600 font-semibold">Rp {{ number_format($r['total_bayar'] ?? 0, 0, ',', '.') }}</td>
                 </tr>
-                @endforeach
+                @empty
+                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Belum ada data pembayaran.</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>

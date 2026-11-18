@@ -83,15 +83,28 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <h3 class="font-bold text-gray-800 mb-4">Semua Pembayaran</h3>
+        <h3 class="font-bold text-gray-800 mb-1">Rekap Pembayaran per Siswa</h3>
+        <p class="text-xs text-gray-500 mb-4">Ringkasan per nama siswa (rapi, tanpa daftar transaksi panjang).</p>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm text-gray-600">
-                <thead class="bg-gray-50 uppercase text-xs font-semibold"><tr><th class="p-3 rounded-l-xl">Siswa</th><th class="p-3">Iuran</th><th class="p-3 rounded-r-xl">Bayar</th></tr></thead>
+                <thead class="bg-gray-50 uppercase text-xs font-semibold">
+                    <tr>
+                        <th class="p-3 rounded-l-xl">No</th>
+                        <th class="p-3">Nama Siswa</th>
+                        <th class="p-3 text-center">Jml Bayar</th>
+                        <th class="p-3 rounded-r-xl text-right">Total Bayar</th>
+                    </tr>
+                </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @forelse($pembayaran as $p)
-                        <tr><td class="p-3 font-medium text-gray-900">{{ $p->siswa->nama ?? '-' }}</td><td class="p-3">{{ $p->iuran->periode ?? '-' }} {{ $p->iuran->minggu ?? '' }}</td><td class="p-3 text-green-600 font-semibold">Rp {{ number_format($p->nominal_bayar, 0, ',', '.') }}</td></tr>
+                    @forelse(($rekapPemasukanSiswa ?? []) as $i => $r)
+                        <tr>
+                            <td class="p-3">{{ $i + 1 }}</td>
+                            <td class="p-3 font-medium text-gray-900">{{ $r['nama'] ?? '-' }}</td>
+                            <td class="p-3 text-center text-gray-700">{{ $r['jml_bayar'] ?? 0 }}x</td>
+                            <td class="p-3 text-right text-green-600 font-semibold">Rp {{ number_format($r['total_bayar'] ?? 0, 0, ',', '.') }}</td>
+                        </tr>
                     @empty
-                        <tr><td colspan="3" class="p-4 text-center text-gray-400">Kosong.</td></tr>
+                        <tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada data pembayaran.</td></tr>
                     @endforelse
                 </tbody>
             </table>
