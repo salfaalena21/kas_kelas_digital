@@ -33,7 +33,7 @@ class LunasinIuranSeeder extends Seeder
                     'nominal_bayar' => $iuran->nominal,
                     'kembalian' => 0,
                     'tanggal_bayar' => $iuran->tanggal_jatuh_tempo ?? now()->toDateString(),
-                    'metode' => 'transfer',
+                    'metode' => 'tunai',
                     'status' => 'lunas',
                 ];
 
