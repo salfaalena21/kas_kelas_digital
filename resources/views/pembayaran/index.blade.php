@@ -95,7 +95,17 @@
 
     <!-- Tabel (scroll di dalam, header tetap) -->
     <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">Riwayat Pembayaran</h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">Riwayat Pembayaran</h2>
+                <p class="text-xs text-gray-500 mt-1">Total: <span id="pembayaranCountTotal">{{ $pembayaran->count() }}</span> data</p>
+            </div>
+            <div class="relative w-full sm:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="pembayaranSearch" placeholder="Cari siswa, NIS, periode/minggu, tanggal, status..." 
+                       class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
         <div class="overflow-auto max-h-[560px] border border-gray-100 rounded-xl">
             <table class="w-full text-left text-sm text-gray-600">
                 <thead class="text-gray-700 uppercase text-xs font-semibold sticky top-0 z-10">
@@ -110,9 +120,9 @@
                         <th class="p-3 bg-gray-50">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody id="pembayaranTableBody" class="divide-y divide-gray-100">
                     @forelse($pembayaran as $index => $item)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 pembayaran-row" data-search="{{ strtolower(($item->siswa->nama ?? '') . ' ' . ($item->siswa->nis ?? '') . ' ' . ($item->iuran->periode ?? '') . ' ' . ($item->iuran->minggu ?? '') . ' ' . \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') . ' ' . ($item->status ?? '') . ' ' . $item->nominal_bayar . ' ' . $item->kembalian) }}">
                             <td class="p-3">{{ $index + 1 }}</td>
                             <td class="p-3 font-medium text-gray-900">{{ $item->siswa->nama ?? '-' }}<br><span class="text-xs text-gray-400">{{ $item->siswa->nis ?? '' }}</span></td>
                             <td class="p-3">{{ $item->iuran->periode ?? '-' }} {{ $item->iuran->minggu ?? '' }}</td>
@@ -156,6 +166,7 @@
                     @empty
                         <tr><td colspan="8" class="p-4 text-center text-gray-400">Belum ada data pembayaran.</td></tr>
                     @endforelse
+                    <tr id="pembayaranNoResult" class="hidden"><td colspan="8" class="p-4 text-center text-gray-400">Tidak ada data yang cocok dengan pencarian.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -317,5 +328,25 @@
     editModal.addEventListener('click', (e) => {
         if (e.target === editModal) closeEditModal();
     });
+
+    // --- Pencarian/filter tabel riwayat pembayaran ---
+    const pembayaranSearch = document.getElementById('pembayaranSearch');
+    const pembayaranRows = document.querySelectorAll('.pembayaran-row');
+    const pembayaranNoResult = document.getElementById('pembayaranNoResult');
+    const pembayaranCountTotal = document.getElementById('pembayaranCountTotal');
+    if (pembayaranSearch) {
+        pembayaranSearch.addEventListener('input', function () {
+            const q = this.value.toLowerCase().trim();
+            let visible = 0;
+            pembayaranRows.forEach(row => {
+                const text = row.dataset.search || row.textContent.toLowerCase();
+                const match = q === '' || text.includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            if (pembayaranNoResult) pembayaranNoResult.classList.toggle('hidden', visible !== 0);
+            if (pembayaranCountTotal) pembayaranCountTotal.textContent = q ? (visible + ' / {{ $pembayaran->count() }}') : '{{ $pembayaran->count() }}';
+        });
+    }
 </script>
 @endpush

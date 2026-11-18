@@ -535,7 +535,10 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
     // Iuran
     Route::get('/iuran', function () {
-        $iuran = \App\Models\Iuran::withCount('pembayaran')->orderBy('id_iuran', 'desc')->get();
+        $iuran = \App\Models\Iuran::withCount('pembayaran')
+            ->orderBy('tanggal_jatuh_tempo', 'asc')
+            ->orderBy('id_iuran', 'asc')
+            ->get();
         return view('iuran.index', compact('iuran'));
     })->name('bendahara.iuran.index');
 
