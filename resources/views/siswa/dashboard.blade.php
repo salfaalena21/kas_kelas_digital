@@ -68,7 +68,6 @@
 <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
     <div class="flex items-center justify-between mb-4">
         <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2"><i class="fa-solid fa-list-check text-blue-600"></i> Status Pembayaran Seluruh Siswa</h3>
-        <span class="text-xs bg-gray-100 text-gray-600 font-medium px-3 py-1 rounded-lg">{{ $iuranAktif->minggu ?? 'Minggu Ini' }}</span>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-left text-sm text-gray-600">
