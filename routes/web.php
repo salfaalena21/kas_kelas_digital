@@ -75,25 +75,35 @@ Route::get('/__diag/{token}', function (string $token) {
         $periode6 = ['Juni 2026','Juli 2026','Agustus 2026','September 2026','Oktober 2026','November 2026'];
         $siswaCount = \App\Models\Siswa::count();
         $iuranTotal = \App\Models\Iuran::count();
-        $iuran6 = \App\Models\Iuran::whereIn('periode', $periode6)->get(['id_iuran','periode','minggu','nominal']);
+        $iuran6 = \App\Models\Iuran::whereIn('periode', $periode6)->get(['id_iuran','periode','minggu','nominal','tanggal_jatuh_tempo']);
         $iuranByPeriode = \App\Models\Iuran::selectRaw('periode, COUNT(*) as c')->groupBy('periode')->orderBy('periode')->get();
         $pembTotal = \App\Models\Pembayaran::count();
+        $pembSum = (float) \App\Models\Pembayaran::sum('nominal_bayar');
         $pembLunas6 = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6->pluck('id_iuran'))->where('status','lunas')->count();
         $pembDistinctSiswa6 = \App\Models\Pembayaran::whereIn('id_iuran', $iuran6->pluck('id_iuran'))->distinct('id_siswa')->count('id_siswa');
-        $sampleIuran = \App\Models\Iuran::orderBy('id_iuran')->get(['id_iuran','periode','minggu','nominal']);
+        $sampleIuran = \App\Models\Iuran::orderBy('tanggal_jatuh_tempo')->orderBy('id_iuran')->get(['id_iuran','periode','minggu','nominal','tanggal_jatuh_tempo']);
         $samplePemb = \App\Models\Pembayaran::with(['siswa','iuran'])->orderBy('id_pembayaran','desc')->limit(10)->get()->map(fn($p)=>[
-            'id'=>$p->id_pembayaran,'siswa'=>$p->siswa->nama ?? null,'periode'=>$p->iuran->periode ?? null,'minggu'=>$p->iuran->minggu ?? null,'status'=>$p->status
+            'id'=>$p->id_pembayaran,'siswa'=>$p->siswa->nama ?? null,'periode'=>$p->iuran->periode ?? null,'minggu'=>$p->iuran->minggu ?? null,'status'=>$p->status,'metode'=>$p->metode ?? null,'nominal'=>$p->nominal_bayar
         ]);
+        $pengeluaranCount = \App\Models\Pengeluaran::count();
+        $pengeluaranSum = (float) \App\Models\Pengeluaran::sum('jumlah');
+        $pengeluaranAll = \App\Models\Pengeluaran::orderBy('id')->get(['id','jumlah','tanggal','keterangan','created_at','updated_at']);
+        $saldo = $pembSum - $pengeluaranSum;
         return response()->json([
             'siswa_count'=>$siswaCount,
             'iuran_total'=>$iuranTotal,
             'iuran_6bulan_count'=>$iuran6->count(),
             'iuran_by_periode'=>$iuranByPeriode,
             'pembayaran_total'=>$pembTotal,
+            'pembayaran_sum'=>$pembSum,
             'pembayaran_lunas_6bulan'=>$pembLunas6,
             'distinct_siswa_paid_6bulan'=>$pembDistinctSiswa6,
             'sample_iuran'=>$sampleIuran,
             'sample_pembayaran_latest'=>$samplePemb,
+            'pengeluaran_count'=>$pengeluaranCount,
+            'pengeluaran_sum'=>$pengeluaranSum,
+            'saldo'=>$saldo,
+            'pengeluaran_all'=>$pengeluaranAll,
         ]);
     } catch (\Throwable $e) {
         return '<pre>ERR ' . e($e->getMessage()) . '</pre>';
