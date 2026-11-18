@@ -250,12 +250,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         $pengeluaran = \App\Models\Pengeluaran::sum('jumlah');
         $saldo = $pemasukan - $pengeluaran;
 
-        // Grafik arus kas 6 bulan terakhir
+        // Grafik arus kas (Juni - Desember 2026)
         $chartLabels = [];
         $chartMasuk = [];
         $chartKeluar = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $bulan = now()->startOfMonth()->subMonths($i);
+        $start = \Carbon\Carbon::create(2026, 6, 1)->startOfMonth();
+        $end = \Carbon\Carbon::create(2026, 12, 1)->startOfMonth();
+        for ($bulan = $start->copy(); $bulan->lte($end); $bulan->addMonth()) {
             $chartLabels[] = $bulan->locale('id')->translatedFormat('M Y');
             $chartMasuk[] = (float) \App\Models\Pembayaran::whereYear('tanggal_bayar', $bulan->year)
                 ->whereMonth('tanggal_bayar', $bulan->month)
@@ -436,12 +437,13 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
 
         $periodeAktif = optional(\App\Models\Iuran::orderBy('id_iuran', 'desc')->first())->periode ?? 'Minggu berjalan';
 
-        // Grafik arus kas 6 bulan terakhir (sama seperti dashboard admin)
+        // Grafik arus kas (Juni - Desember 2026)
         $chartLabels = [];
         $chartMasuk = [];
         $chartKeluar = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $bulan = now()->startOfMonth()->subMonths($i);
+        $start = \Carbon\Carbon::create(2026, 6, 1)->startOfMonth();
+        $end = \Carbon\Carbon::create(2026, 12, 1)->startOfMonth();
+        for ($bulan = $start->copy(); $bulan->lte($end); $bulan->addMonth()) {
             $chartLabels[] = $bulan->locale('id')->translatedFormat('M Y');
             $chartMasuk[] = (float) \App\Models\Pembayaran::whereYear('tanggal_bayar', $bulan->year)
                 ->whereMonth('tanggal_bayar', $bulan->month)
