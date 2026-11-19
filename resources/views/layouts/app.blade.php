@@ -87,7 +87,7 @@
                     </a>
                     <a href="{{ route('bendahara.pengeluaran') }}"
                        class="flex items-center space-x-3 px-3 py-2.5 rounded-xl {{ request()->is('bendahara/pengeluaran*') ? 'bg-blue-600 text-white font-medium' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <i class="fa-solid fa-receipt"></i><span>Pengeluaran & Nota</span>
+                        <i class="fa-solid fa-receipt"></i><span>Pengeluaran</span>
                     </a>
                     <a href="{{ route('bendahara.bukti.index') }}"
                        class="flex items-center space-x-3 px-3 py-2.5 rounded-xl {{ request()->is('bendahara/bukti*') ? 'bg-blue-600 text-white font-medium' : 'text-gray-600 hover:bg-gray-100' }}">

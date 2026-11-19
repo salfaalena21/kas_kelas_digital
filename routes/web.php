@@ -584,16 +584,116 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
             'periode' => 'required',
             'nominal' => 'required|numeric',
         ]);
-        \App\Models\Iuran::create($request->only('periode', 'minggu', 'nominal', 'tanggal_jatuh_tempo'));
+
+        // Normalisasi jatuh tempo (input teks): terima dd/mm/yyyy atau yyyy-mm-dd, simpan sebagai Y-m-d
+        $jatuhTempo = $request->input('tanggal_jatuh_tempo');
+        if (filled($jatuhTempo)) {
+            $jatuhTempo = trim((string) $jatuhTempo);
+            if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $jatuhTempo)) {
+                try { $jatuhTempo = \Carbon\Carbon::createFromFormat('d/m/Y', $jatuhTempo)->toDateString(); }
+                catch (\Exception $e) { $jatuhTempo = null; }
+            } else {
+                try { $jatuhTempo = \Carbon\Carbon::parse($jatuhTempo)->toDateString(); }
+                catch (\Exception $e) { $jatuhTempo = null; }
+            }
+        } else {
+            $jatuhTempo = null;
+        }
+
+        \App\Models\Iuran::create([
+            'periode' => $request->periode,
+            'minggu' => $request->minggu,
+            'nominal' => $request->nominal,
+            'tanggal_jatuh_tempo' => $jatuhTempo,
+        ]);
         return back()->with('success', 'Data iuran berhasil ditambahkan.');
     })->name('bendahara.iuran.store');
+
+    // Generate iuran massal berdasarkan rentang tahun (per bulan & per minggu)
+    // Catatan: sesuaikan nama kolom tabel iuran (periode, minggu, nominal, tanggal_jatuh_tempo)
+    // dan nama route 'bendahara.iuran.generate' jika struktur project Anda berbeda.
+    Route::post('/iuran/generate', function (Illuminate\Http\Request $request) {
+        $request->validate([
+            'tahun_awal'      => 'required|integer|min:2000|max:2100',
+            'tahun_akhir'     => 'required|integer|min:2000|max:2100|gte:tahun_awal',
+            'nominal_default' => 'required|numeric|min:0',
+            'jumlah_minggu'   => 'required|integer|in:4,5', // Minggu ke-1 s/d ke-4 atau ke-5
+        ]);
+
+        $namaBulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+
+        $created = 0;
+        $skipped = 0;
+        $tahunAwal = (int) $request->tahun_awal;
+        $tahunAkhir = (int) $request->tahun_akhir;
+        $jumlahMinggu = (int) $request->jumlah_minggu;
+        $nominal = $request->nominal_default;
+
+        for ($tahun = $tahunAwal; $tahun <= $tahunAkhir; $tahun++) {
+            for ($bulan = 1; $bulan <= 12; $bulan++) {
+                // Format periode mengikuti gaya project: "Mei 2023" (sesuaikan jika perlu)
+                $periode = $namaBulan[$bulan] . ' ' . $tahun;
+                $daysInMonth = \Carbon\Carbon::create($tahun, $bulan, 1)->daysInMonth;
+
+                for ($minggu = 1; $minggu <= $jumlahMinggu; $minggu++) {
+                    $labelMinggu = 'Minggu ke-' . $minggu; // sesuaikan nilai kolom 'minggu' jika berbeda
+
+                    // Jatuh tempo: minggu ke-1..4 = hari 7,14,21,28; minggu ke-5 = akhir bulan (aman utk semua bulan)
+                    $hari = ($minggu <= 4) ? ($minggu * 7) : $daysInMonth;
+                    if ($hari > $daysInMonth) {
+                        $hari = $daysInMonth;
+                    }
+                    $jatuhTempo = \Carbon\Carbon::create($tahun, $bulan, $hari)->toDateString();
+
+                    // Anti-duplikat: kombinasi periode + minggu yang sudah ada tidak dibuat ulang
+                    $record = \App\Models\Iuran::firstOrCreate(
+                        ['periode' => $periode, 'minggu' => $labelMinggu],
+                        ['nominal' => $nominal, 'tanggal_jatuh_tempo' => $jatuhTempo]
+                    );
+
+                    if ($record->wasRecentlyCreated) {
+                        $created++;
+                    } else {
+                        $skipped++;
+                    }
+                }
+            }
+        }
+
+        return back()->with('success', "Generate iuran selesai: {$created} data baru ditambahkan, {$skipped} data sudah ada (dilewati, anti-duplikat).");
+    })->name('bendahara.iuran.generate');
 
     Route::put('/iuran/{iuran}', function (Illuminate\Http\Request $request, \App\Models\Iuran $iuran) {
         $request->validate([
             'periode' => 'required',
             'nominal' => 'required|numeric',
         ]);
-        $iuran->update($request->only('periode', 'minggu', 'nominal', 'tanggal_jatuh_tempo'));
+
+        // Normalisasi jatuh tempo (input teks): terima dd/mm/yyyy atau yyyy-mm-dd, simpan sebagai Y-m-d
+        $jatuhTempo = $request->input('tanggal_jatuh_tempo');
+        if (filled($jatuhTempo)) {
+            $jatuhTempo = trim((string) $jatuhTempo);
+            if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $jatuhTempo)) {
+                try { $jatuhTempo = \Carbon\Carbon::createFromFormat('d/m/Y', $jatuhTempo)->toDateString(); }
+                catch (\Exception $e) { $jatuhTempo = null; }
+            } else {
+                try { $jatuhTempo = \Carbon\Carbon::parse($jatuhTempo)->toDateString(); }
+                catch (\Exception $e) { $jatuhTempo = null; }
+            }
+        } else {
+            $jatuhTempo = null;
+        }
+
+        $iuran->update([
+            'periode' => $request->periode,
+            'minggu' => $request->minggu,
+            'nominal' => $request->nominal,
+            'tanggal_jatuh_tempo' => $jatuhTempo,
+        ]);
         return back()->with('success', 'Data iuran berhasil diperbarui.');
     })->name('bendahara.iuran.update');
 
@@ -606,7 +706,8 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
     Route::get('/pembayaran', function () {
         $pembayaran = \App\Models\Pembayaran::with(['siswa', 'iuran'])->orderBy('tanggal_bayar', 'desc')->get();
         $siswa = \App\Models\Siswa::with('kelas')->orderBy('nama')->get();
-        $iuran = \App\Models\Iuran::orderBy('id_iuran', 'desc')->get();
+        // Ambil SEMUA iuran tanpa limit/take agar data 2020-2026 tetap muncul & dapat dicari di dropdown
+        $iuran = \App\Models\Iuran::orderBy('tanggal_jatuh_tempo', 'desc')->orderBy('id_iuran', 'desc')->get();
         return view('pembayaran.index', compact('pembayaran', 'siswa', 'iuran'));
     })->name('bendahara.pembayaran');
 

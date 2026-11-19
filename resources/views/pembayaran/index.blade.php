@@ -47,14 +47,26 @@
                     @endforeach
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tagihan Iuran</label>
-                <select name="id_iuran" id="id_iuran" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-                    <option value="" data-nominal="0">-- Pilih Iuran --</option>
-                    @foreach($iuran as $i)
-                        <option value="{{ $i->id_iuran }}" data-nominal="{{ $i->nominal }}">{{ $i->periode }} - {{ $i->minggu }} (Rp {{ number_format($i->nominal, 0, ',', '.') }})</option>
-                    @endforeach
-                </select>
+            <div class="relative">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tagihan Iuran <span class="text-gray-400 font-normal">(ketik untuk mencari)</span></label>
+                <input type="text" id="iuran_search" placeholder="Ketik bulan, tahun, atau minggu (cth: Mei 2023, 2020)..." autocomplete="off"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                <input type="hidden" name="id_iuran" id="id_iuran">
+                <div id="iuran_dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl max-h-56 overflow-y-auto shadow-lg">
+                    @forelse($iuran as $i)
+                        <button type="button"
+                                data-id="{{ $i->id_iuran }}"
+                                data-nominal="{{ $i->nominal }}"
+                                data-label="{{ $i->periode }} - {{ $i->minggu }} (Rp {{ number_format($i->nominal, 0, ',', '.') }})"
+                                class="iuran-option w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50">
+                            <span class="font-medium text-gray-900">{{ $i->periode }} - {{ $i->minggu }}</span>
+                            <span class="text-xs text-gray-400">Rp {{ number_format($i->nominal, 0, ',', '.') }}</span>
+                        </button>
+                    @empty
+                        <div class="px-3 py-2 text-sm text-gray-400">Belum ada data iuran.</div>
+                    @endforelse
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Ketik untuk memfilter (bulan/tahun/minggu), lalu pilih dari daftar. Menampilkan seluruh data iuran.</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nominal Bayar (Rp)</label>
@@ -206,13 +218,23 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tagihan Iuran</label>
-                <select name="id_iuran" id="edit_id_iuran" class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+            <div class="relative">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tagihan Iuran <span class="text-gray-400 font-normal">(ketik untuk mencari)</span></label>
+                <input type="text" id="edit_iuran_search" placeholder="Ketik bulan, tahun, atau minggu..." autocomplete="off"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                <input type="hidden" name="id_iuran" id="edit_id_iuran">
+                <div id="edit_iuran_dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl max-h-48 overflow-y-auto shadow-lg">
                     @foreach($iuran as $i)
-                        <option value="{{ $i->id_iuran }}" data-nominal="{{ $i->nominal }}">{{ $i->periode }} - {{ $i->minggu }} (Rp {{ number_format($i->nominal, 0, ',', '.') }})</option>
+                        <button type="button"
+                                data-id="{{ $i->id_iuran }}"
+                                data-nominal="{{ $i->nominal }}"
+                                data-label="{{ $i->periode }} - {{ $i->minggu }} (Rp {{ number_format($i->nominal, 0, ',', '.') }})"
+                                class="edit-iuran-option w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50">
+                            <span class="font-medium text-gray-900">{{ $i->periode }} - {{ $i->minggu }}</span>
+                            <span class="text-xs text-gray-400">Rp {{ number_format($i->nominal, 0, ',', '.') }}</span>
+                        </button>
                     @endforeach
-                </select>
+                </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -264,71 +286,163 @@
     const siswaOptions = document.querySelectorAll('.siswa-option');
 
     function filterSiswa() {
+        if (!siswaSearch || !siswaDropdown) return;
         const q = siswaSearch.value.toLowerCase();
-        let visible = 0;
         siswaOptions.forEach(opt => {
             const match = opt.dataset.label.toLowerCase().includes(q);
             opt.style.display = match ? '' : 'none';
-            if (match) visible++;
         });
         siswaDropdown.classList.remove('hidden');
-        if (siswaSearch.value === '') idSiswaInput.value = '';
+        if (siswaSearch.value === '' && idSiswaInput) idSiswaInput.value = '';
     }
 
-    siswaSearch.addEventListener('focus', filterSiswa);
-    siswaSearch.addEventListener('input', filterSiswa);
+    if (siswaSearch) {
+        siswaSearch.addEventListener('focus', filterSiswa);
+        siswaSearch.addEventListener('input', filterSiswa);
+    }
 
     siswaOptions.forEach(opt => {
         opt.addEventListener('click', () => {
-            idSiswaInput.value = opt.dataset.id;
-            siswaSearch.value = opt.dataset.label;
-            siswaDropdown.classList.add('hidden');
+            if (idSiswaInput) idSiswaInput.value = opt.dataset.id;
+            if (siswaSearch) siswaSearch.value = opt.dataset.label;
+            if (siswaDropdown) siswaDropdown.classList.add('hidden');
+        });
+    });
+
+    // --- Dropdown Tagihan Iuran searchable (Form Tambah) ---
+    // Mencari berdasarkan bulan/tahun/minggu, contoh: "Mei 2023" atau "2020"
+    const iuranSearch = document.getElementById('iuran_search');
+    const iuranDropdown = document.getElementById('iuran_dropdown');
+    const idIuranInput = document.getElementById('id_iuran'); // hidden input (name="id_iuran")
+    const iuranOptions = document.querySelectorAll('.iuran-option');
+    let selectedIuranNominal = 0; // nominal iuran terpilih untuk hitung kembalian
+
+    function filterIuran() {
+        if (!iuranSearch || !iuranDropdown) return;
+        const q = iuranSearch.value.toLowerCase().trim();
+        iuranOptions.forEach(opt => {
+            const label = (opt.dataset.label || opt.textContent).toLowerCase();
+            opt.style.display = (q === '' || label.includes(q)) ? '' : 'none';
+        });
+        iuranDropdown.classList.remove('hidden');
+    }
+
+    if (iuranSearch) {
+        iuranSearch.addEventListener('focus', filterIuran);
+        iuranSearch.addEventListener('input', function () {
+            // Reset pilihan saat mengetik ulang agar id_iuran tidak terkirim salah
+            if (idIuranInput) idIuranInput.value = '';
+            selectedIuranNominal = 0;
+            filterIuran();
+            hitungKembalian();
+        });
+    }
+
+    iuranOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+            if (idIuranInput) idIuranInput.value = opt.dataset.id;
+            selectedIuranNominal = parseFloat(opt.dataset.nominal || 0);
+            if (iuranSearch) iuranSearch.value = opt.dataset.label || '';
+            if (iuranDropdown) iuranDropdown.classList.add('hidden');
             hitungKembalian();
         });
     });
 
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#siswa_search') && !e.target.closest('#siswa_dropdown')) {
-            siswaDropdown.classList.add('hidden');
-        }
-    });
-
-    // --- Kembalian otomatis: Nominal Bayar - Nominal Iuran ---
-    const iuranSelect = document.getElementById('id_iuran');
+    // --- Kembalian otomatis: Nominal Bayar - Nominal Iuran (Form Tambah) ---
     const nominalInput = document.getElementById('nominal_bayar');
     const kembalianInput = document.getElementById('kembalian');
 
     function hitungKembalian() {
-        const nominalIuran = parseFloat(iuranSelect.selectedOptions[0]?.dataset.nominal || 0);
-        const bayar = parseFloat(nominalInput.value || 0);
-        kembalianInput.value = Math.max(0, bayar - nominalIuran);
+        const nominalIuran = parseFloat(selectedIuranNominal || 0);
+        const bayar = parseFloat(nominalInput ? nominalInput.value : 0) || 0;
+        if (kembalianInput) kembalianInput.value = Math.max(0, bayar - nominalIuran);
     }
 
-    iuranSelect.addEventListener('change', hitungKembalian);
-    nominalInput.addEventListener('input', hitungKembalian);
+    if (nominalInput) nominalInput.addEventListener('input', hitungKembalian);
+
+    // --- Dropdown Tagihan Iuran searchable (Modal Edit) ---
+    const editIuranSearch = document.getElementById('edit_iuran_search');
+    const editIuranDropdown = document.getElementById('edit_iuran_dropdown');
+    const editIdIuranInput = document.getElementById('edit_id_iuran');
+    const editIuranOptions = document.querySelectorAll('.edit-iuran-option');
+    let editSelectedIuranNominal = 0;
+
+    function filterEditIuran() {
+        if (!editIuranSearch || !editIuranDropdown) return;
+        const q = editIuranSearch.value.toLowerCase().trim();
+        editIuranOptions.forEach(opt => {
+            const label = (opt.dataset.label || opt.textContent).toLowerCase();
+            opt.style.display = (q === '' || label.includes(q)) ? '' : 'none';
+        });
+        editIuranDropdown.classList.remove('hidden');
+    }
+
+    if (editIuranSearch) {
+        editIuranSearch.addEventListener('focus', filterEditIuran);
+        editIuranSearch.addEventListener('input', function () {
+            if (editIdIuranInput) editIdIuranInput.value = '';
+            editSelectedIuranNominal = 0;
+            filterEditIuran();
+            hitungKembalianEdit();
+        });
+    }
+
+    editIuranOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+            if (editIdIuranInput) editIdIuranInput.value = opt.dataset.id;
+            editSelectedIuranNominal = parseFloat(opt.dataset.nominal || 0);
+            if (editIuranSearch) editIuranSearch.value = opt.dataset.label || '';
+            if (editIuranDropdown) editIuranDropdown.classList.add('hidden');
+            hitungKembalianEdit();
+        });
+    });
+
+    // Tutup dropdown saat klik di luar
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#siswa_search') && !e.target.closest('#siswa_dropdown')) {
+            if (siswaDropdown) siswaDropdown.classList.add('hidden');
+        }
+        if (!e.target.closest('#iuran_search') && !e.target.closest('#iuran_dropdown')) {
+            if (iuranDropdown) iuranDropdown.classList.add('hidden');
+        }
+        if (!e.target.closest('#edit_iuran_search') && !e.target.closest('#edit_iuran_dropdown')) {
+            if (editIuranDropdown) editIuranDropdown.classList.add('hidden');
+        }
+    });
 
     // --- Modal Edit ---
     const editModal = document.getElementById('editModal');
     const editForm = document.getElementById('editForm');
-    const editIuran = document.getElementById('edit_id_iuran');
     const editNominal = document.getElementById('edit_nominal_bayar');
     const editKembalian = document.getElementById('edit_kembalian');
 
     function hitungKembalianEdit() {
-        const nominalIuran = parseFloat(editIuran.selectedOptions[0]?.dataset.nominal || 0);
-        const bayar = parseFloat(editNominal.value || 0);
-        editKembalian.value = Math.max(0, bayar - nominalIuran);
+        const nominalIuran = parseFloat(editSelectedIuranNominal || 0);
+        const bayar = parseFloat(editNominal ? editNominal.value : 0) || 0;
+        if (editKembalian) editKembalian.value = Math.max(0, bayar - nominalIuran);
     }
 
-    editIuran.addEventListener('change', hitungKembalianEdit);
-    editNominal.addEventListener('input', hitungKembalianEdit);
+    if (editNominal) editNominal.addEventListener('input', hitungKembalianEdit);
 
     function openEditModal(btn) {
         editForm.action = "{{ url('bendahara/pembayaran') }}/" + btn.dataset.id;
         document.getElementById('edit_id_siswa').value = btn.dataset.idSiswa;
-        editIuran.value = btn.dataset.idIuran;
-        editNominal.value = btn.dataset.nominal;
-        editKembalian.value = btn.dataset.kembalian;
+
+        // Set pilihan iuran (searchable) berdasarkan data-id-iuran tombol edit
+        const iuranId = btn.dataset.idIuran;
+        if (editIdIuranInput) editIdIuranInput.value = iuranId || '';
+        const opt = Array.from(editIuranOptions).find(o => String(o.dataset.id) === String(iuranId));
+        if (opt) {
+            editSelectedIuranNominal = parseFloat(opt.dataset.nominal || 0);
+            if (editIuranSearch) editIuranSearch.value = opt.dataset.label || '';
+        } else {
+            editSelectedIuranNominal = 0;
+            if (editIuranSearch) editIuranSearch.value = '';
+        }
+
+        if (editNominal) editNominal.value = btn.dataset.nominal;
+        // Kembalian mengikuti data tersimpan; akan dihitung ulang otomatis saat nominal/iuran diubah
+        if (editKembalian) editKembalian.value = btn.dataset.kembalian;
         document.getElementById('edit_tanggal_bayar').value = btn.dataset.tanggal;
         document.getElementById('edit_metode').value = btn.dataset.metode || 'tunai';
         document.getElementById('edit_status').value = btn.dataset.status || 'lunas';
@@ -336,12 +450,15 @@
     }
 
     function closeEditModal() {
-        editModal.classList.add('hidden');
+        if (editModal) editModal.classList.add('hidden');
+        if (editIuranDropdown) editIuranDropdown.classList.add('hidden');
     }
 
-    editModal.addEventListener('click', (e) => {
-        if (e.target === editModal) closeEditModal();
-    });
+    if (editModal) {
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) closeEditModal();
+        });
+    }
 
     // --- Pencarian/filter tabel riwayat pembayaran ---
     const pembayaranSearch = document.getElementById('pembayaranSearch');
