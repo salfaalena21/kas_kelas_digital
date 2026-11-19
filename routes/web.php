@@ -617,7 +617,6 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
             'tahun_awal'      => 'required|integer|min:2000|max:2100',
             'tahun_akhir'     => 'required|integer|min:2000|max:2100|gte:tahun_awal',
             'nominal_default' => 'required|numeric|min:0',
-            'jumlah_minggu'   => 'required|integer|in:4,5', // Minggu ke-1 s/d ke-4 atau ke-5
         ]);
 
         $namaBulan = [
@@ -630,7 +629,7 @@ Route::middleware(['auth', 'role:bendahara'])->prefix('bendahara')->group(functi
         $skipped = 0;
         $tahunAwal = (int) $request->tahun_awal;
         $tahunAkhir = (int) $request->tahun_akhir;
-        $jumlahMinggu = (int) $request->jumlah_minggu;
+        $jumlahMinggu = 4; // Default: Minggu ke-1 s/d ke-4 per bulan (sesuaikan jika perlu)
         $nominal = $request->nominal_default;
 
         for ($tahun = $tahunAwal; $tahun <= $tahunAkhir; $tahun++) {

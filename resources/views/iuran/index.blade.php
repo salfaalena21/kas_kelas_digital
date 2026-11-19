@@ -86,13 +86,6 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nominal Default (Rp)</label>
                     <input type="number" name="nominal_default" value="{{ old('nominal_default', 5000) }}" min="0" required
                            class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Minggu / Bulan</label>
-                    <select name="jumlah_minggu" required class="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <option value="4" {{ old('jumlah_minggu', 4) == 4 ? 'selected' : '' }}>Minggu ke-1 s/d ke-4</option>
-                        <option value="5" {{ old('jumlah_minggu') == 5 ? 'selected' : '' }}>Minggu ke-1 s/d ke-5</option>
-                    </select>
                     <p class="text-xs text-gray-400 mt-1">Contoh: 2020–2026, 12 bulan, 4 minggu = 336 tagihan (yang sudah ada tidak dibuat ulang).</p>
                 </div>
                 <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl text-sm transition"
